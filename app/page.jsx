@@ -33,6 +33,8 @@ import { motion } from "framer-motion";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import FlowingMenu from "@/components/ui/FlowingMenu";
+import Link from "next/link";
+import TextType from "@/components/ui/TextType";
 
 // Define constants with corrected emoji regex
 const KEY_START_MARKER = "[KDSM_KEY_START]";
@@ -521,15 +523,36 @@ export default function Home() {
                 </div>
               )}
             </CardContent>
-
-            <CardFooter className="flex-col p-4 sm:p-6">
+            <Link
+              className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
+              href={"/readme#encryption-api"}
+              target="_blank"
+            >
+              <TextType
+                text={[
+                  "Take the power of encryption & decryption to the next level []~(￣▽￣)~*",
+                  "For your projects with KDSM Encryptor!",
+                  "Make things secure!",
+                  "Happy coding!",
+                  "KDSM Encryptor - Your go-to for secure encryption!",
+                  "Learn about v1 API integration!",
+                  "Just a 2 step process!",
+                ]}
+                typingSpeed={75}
+                pauseDuration={1500}
+                showCursor={true}
+                cursorCharacter="|"
+              />
+            </Link>
+            <CardFooter className="flex-col">
               <FlowingMenu />
-              <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0">
+              <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0 mt-8">
                 <ShinyText
                   text="KDSM Encryptor by - Idris Vohra"
                   disabled={false}
                   speed={3}
                   className="text-center"
+                  link
                 />
                 <ShinyText
                   text="OP • Super Fast • One of a kind"
@@ -552,4 +575,4 @@ export default function Home() {
       />
     </div>
   );
-};
+}

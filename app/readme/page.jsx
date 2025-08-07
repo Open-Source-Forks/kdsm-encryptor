@@ -6,7 +6,7 @@ import Scrollspy from "@/components/ui/Scrollspy";
 import Section from "@/components/ui/Section";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, Info, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import {
@@ -39,7 +39,8 @@ export default function ReadmePage() {
     { id: "security", title: "Security" },
     { id: "usage", title: "Usage" },
     { id: "technical", title: "Technical Details" },
-    { id: "api-documentation", title: "API Documentation" },
+    { id: "free-password-generation-api", title: "API Pass Gen. (free)" },
+    { id: "encryption-api", title: "Encryption API" },
     { id: "faqs", title: "FAQs" },
   ];
   const FAQs = [
@@ -319,8 +320,55 @@ export default function ReadmePage() {
               </li>
             </ul>
           </Section>
+          <Section
+            id="free-password-generation-api"
+            title="API Pass Gen. (free)"
+          >
+            <p className="mb-4">
+              Integrate the ability to generate a strong password in your
+              project with ease with our API for free!
+            </p>
+            <div className="bg-accent p-4 rounded-lg text-blue-400 mb-4">
+                <h4 className="font-medium mb-2 flex">
+                  <Info className="mr-2 size-5" />
+                  Important info
+                </h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Free for all (No API key required)</li>
+                  <li>• Usage is not monitored or rate-limited</li>
+                </ul>
+              </div>
+            <div>
+              <h4 className="text-lg font-medium mb-2">
+                GET /password-generator
+              </h4>
+              <p className="mb-4">
+                Generate a strong password via query parameters.
+              </p>
+              <h5 className="font-medium mb-2">Query Parameters:</h5>
+              <CodeBlock>{`length=12&includeNumbers=true&includeSpecialChars=true&includeUppercase=true&includeLowercase=true&excludeSimilar=false&customChars=`}</CodeBlock>
+              <h5 className="font-medium mb-2 mt-4">Response:</h5>
+              <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>
+              <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
+              <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&includeNumbers=true&includeSpecialChars=true"`}</CodeBlock>
+            </div>
+            <div>
+              <h4 className="text-lg font-medium mb-2">
+                POST /password-generator
+              </h4>
 
-          <Section id="api-documentation" title="API Documentation">
+              <p className="mb-4">Generate a strong password via JSON body.</p>
+              <h5 className="font-medium mb-2">Request Body:</h5>
+              <CodeBlock>{`{ "length": 12, "includeNumbers": true, "includeSpecialChars": true, "includeUppercase": true, "includeLowercase": true, "excludeSimilar": false, "customChars": "" }`}</CodeBlock>
+              <h5 className="font-medium mb-2 mt-4">Response:</h5>
+              <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>
+              <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
+              <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+  -H "Content-Type: application/json" \
+  -d '{ "length": 12, "includeNumbers": true }'`}</CodeBlock>
+            </div>
+          </Section>
+          <Section id="encryption-api" title="Encryption API v1">
             <div className="flex justify-center items-center w-full mb-5">
               <Image
                 src="/icons/5.png"
@@ -359,7 +407,9 @@ export default function ReadmePage() {
               <div>
                 <h3 className="text-xl font-semibold mb-4">Rate Limits</h3>
                 <div className="bg-secondary p-4 rounded-lg mb-4">
-                  <h4 className="font-medium mb-3">Tier-based Rate Limiting</h4>
+                  <h4 className="font-medium mb-3">
+                    Tier-based Rate Limiting (Only applicable to API v1)
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 p-3 bg-gray-600 rounded">
                       <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -655,11 +705,12 @@ except Exception as e:
                 </ul>
               </div>
 
-              <div className="bg-accent p-4 rounded-lg">
-                <h4 className="font-medium mb-2 text-primary">
-                  ⚠️ Important Notes
+              <div className="bg-accent p-4 rounded-lg text-orange-400">
+                <h4 className="font-medium mb-2 flex">
+                  <TriangleAlert className="mr-2 size-5" />
+                  Important Notes
                 </h4>
-                <ul className="text-sm text-primary space-y-1">
+                <ul className="text-sm space-y-1">
                   <li>
                     • API keys cannot be recovered if lost - store them securely
                   </li>

@@ -1,12 +1,20 @@
-const ShinyText = ({ text, disabled = false, speed = 5, className = '' }) => {
+import Link from "next/link";
+
+const ShinyText = ({
+  text,
+  disabled = false,
+  speed = 5,
+  className = "",
+  link = false,
+}) => {
   const animationDuration = `${speed}s`;
 
   return (
     <div
-      className={`shiny-text ${disabled ? 'disabled' : ''} ${className}`}
+      className={`shiny-text ${disabled ? "disabled" : ""} ${className}`}
       style={{ animationDuration }}
     >
-      {text}
+      {link ? <Link href={"https://idrisvohra.me/"} target="_blank">{text}</Link> : text}
     </div>
   );
 };

@@ -30,12 +30,14 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import FlowingMenu from "@/components/ui/FlowingMenu";
+import TextType from "@/components/ui/TextType";
+import Link from "next/link";
 
 const COPY_TIMEOUT = 2000;
 
 export default function PasswordGenerator() {
   const [formState, setFormState] = useState({
-    length: [12],
+    length: [9],
     includeNumbers: true,
     includeSpecialChars: true,
     includeUppercase: true,
@@ -427,15 +429,35 @@ export default function PasswordGenerator() {
               </div>
             )}
           </CardContent>
-
-          <CardFooter className="flex-col p-4 sm:p-6">
+          <Link
+            className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
+            href={"/readme#free-password-generation-api"}
+            target="_blank"
+          >
+            <TextType
+              text={[
+                "Give the power to your projects to generate secure passwords []~(￣▽￣)~*",
+                "For your projects with KDSM Password Generator!",
+                "Happy coding!",
+                "Enjoy free and secure password generation API!",
+                "KDSM Encryptor - Your go-to for secure encryption!",
+                "Ease of setup and use, no API key required!",
+              ]}
+              typingSpeed={75}
+              pauseDuration={1500}
+              showCursor={true}
+              cursorCharacter="|"
+            />
+          </Link>
+          <CardFooter className="flex-col">
             <FlowingMenu />
-            <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0">
+            <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0 mt-8">
               <ShinyText
                 text="KDSM Password Generator by - Idris Vohra"
                 disabled={false}
                 speed={3}
                 className="text-center"
+                link
               />
               <ShinyText
                 text="Secure • Customizable • Fast"

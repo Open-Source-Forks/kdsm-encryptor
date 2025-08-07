@@ -58,7 +58,7 @@
 
 ---
 
-### ヽ(°〇°)ﾉ **PHASE 4: Real-Time Socket Connection + Context Handling**
+### ヽ(° 〇 °)ﾉ **PHASE 4: Real-Time Socket Connection + Context Handling**
 
 **Objectives:**
 
@@ -104,7 +104,7 @@
 
 ---
 
-### (つ°ヮ°)つ **PHASE 6: Encrypted File Sharing**
+### (つ ° ヮ °)つ **PHASE 6: Encrypted File Sharing**
 
 **Objectives:**
 
@@ -160,7 +160,7 @@
 
 ---
 
-### ヾ(≧▽≦*)o **PHASE 9: Subscription Enforcement + Feature Limits**
+### ヾ(≧▽≦\*)o **PHASE 9: Subscription Enforcement + Feature Limits**
 
 **Objectives:**
 
@@ -173,7 +173,7 @@
 
    - Max 3 chat rooms for free tier
    - Max 10MB/file
-   - No 7-day retention for free users
+   - No 3-day retention or above for free users
 
 3. Add modal prompting for Pro upgrade when limit hit.
 
@@ -184,13 +184,6 @@
 ---
 
 ### (¬_¬) `users` (managed by Appwrite Auth)
-
-| Field              | Type         | Description             |
-| ------------------ | ------------ | ----------------------- |
-| `username`         | string       | Unique username         |
-| `subscriptionTier` | enum         | free / pro              |
-| `profilePicture`   | string (URL) | Profile avatar          |
-| `joinedAt`         | datetime     | User creation timestamp |
 
 ---
 
@@ -207,17 +200,18 @@
 | `createdAt`   | datetime      | Room creation time     |
 
 ---
+
 ### ( ˘▾˘) `messages`
 
-| Field              | Type                        | Description                 |
-| ------------------ | --------------------------- | --------------------------- |
-| `room`             | relationship with chatRooms | Linked room                 |
-| `senderId`         | string                      | Auth user ID                |
-| `contentEncrypted` | string                      | KDSM encrypted message      |
-| `replyToId`        | string                      | Message ID being replied to |
-| `readBy`           | array(object)               | [{userId, readAt}] tracking |
-| `isExpired`        | boolean                     | Soft delete flag            |
-| `expiresAt`        | datetime                    | When to expire message      |
+| Field              | Type          | Description                 |
+| ------------------ | ------------- | --------------------------- |
+| `roomId`           | string        | chatRoom Id                 |
+| `senderId`         | string        | Auth user ID                |
+| `contentEncrypted` | string        | KDSM encrypted message      |
+| `replyToId`        | string        | Message ID being replied to |
+| `readBy`           | array(object) | [{userId, readAt}] tracking |
+| `isExpired`        | boolean       | Soft delete flag            |
+| `expiresAt`        | datetime      | When to expire message      |
 
 ---
 
@@ -232,6 +226,32 @@
 | `fileSize`    | int      | Enforced < 10MB for free  |
 | `expiresAt`   | datetime | Based on retention policy |
 | `requiresKey` | boolean  | Always true               |
+
+---
+
+### ╰( ͡° ͜ʖ ͡° )つ `subscriptionTier`
+
+| Field           | Type        | Description                             |
+| --------------- | ----------- | --------------------------------------- |
+| `name`          | string      | Name such as: free/premium/developer    |
+| `display_name`  | string      | FREE_TIER/ PREMIUM_TIER/ DEVELOPER_TIER |
+| `monthly_price` | float       | Monthly price                           |
+| `yearly_price`  | float       | Yearly price                            |
+| `features`      | JSON string | JSON string of total features           |
+
+---
+
+### ╰( ͡° ͜ʖ ͡° )つ `subscriptions`
+
+| Field             | Type                               | Description                            |
+| ----------------- | ---------------------------------- | -------------------------------------- |
+| `userId`          | string                             | Reference to Appwrite user             |
+| `tier`            | relationship with subscriptionTier | Reference to subscriptionTier          |
+| `status`          | enum string                        | active/cancelled/expired/trial         |
+| `startDate`       | datetime                           | Subscription starting date             |
+| `endDate`         | datetime                           | Subscription ending date               |
+| `paymentProvider` | string                             | stripe/paypal (Null for free)          |
+| `paymentId`       | string                             | stripe subscription id (Null for free) |
 
 ### Todos:
 

@@ -164,7 +164,7 @@ export default function ContributePage() {
           </Button>
         </div>
 
-        <p className="text-primary-foreground text-sm italic mt-6 max-w-xl mx-auto">
+        <p className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary p-2 rounded-md text-sm italic mt-6 max-w-xl mx-auto">
           "In a world where privacy is becoming a luxury, we're making it a
           right." - KDSM Team
         </p>

@@ -98,13 +98,6 @@ _Beautiful, intuitive interface that makes security accessible to everyone_
      --collectionId "messages" \
      --name "Encrypted Messages" \
      --permissions "read(\"any\")" "write(\"any\")"
-
-   # Create users collection for additional user data
-   appwrite databases createCollection \
-     --databaseId "kdsm-main" \
-     --collectionId "user-profiles" \
-     --name "User Profiles" \
-     --permissions "read(\"any\")" "write(\"any\")"
    ```
 
 4. **Set up Authentication**
