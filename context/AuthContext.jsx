@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
-
+const AuthContext = createContext({
+  user: null,
+  loading: true,
+  error: null,
+  login: async (email, password) => {},
+  register: async (email, password, name) => {},
+  logout: async () => {},
+});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -14,16 +20,16 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await fetch('/api/auth/user', {
-          next: { revalidate: 60 } // Cache for 60 seconds
+        const response = await fetch("/api/auth/user", {
+          next: { revalidate: 60 }, // Cache for 60 seconds
         });
         const data = await response.json();
-        
+
         if (data.success && data.user) {
           setUser(data.user);
         }
       } catch (err) {
-        console.error('Session check failed:', err);
+        console.error("Session check failed:", err);
       } finally {
         setLoading(false);
       }
@@ -36,33 +42,33 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/auth/session', {
-        method: 'POST',
+      const response = await fetch("/api/auth/session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-        cache: 'no-store' // Don't cache POST requests
+        cache: "no-store", // Don't cache POST requests
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || "Login failed");
       }
-      
+
       // Fetch user data after successful login
-      const userResponse = await fetch('/api/auth/session', {
-        next: { revalidate: 60 } // Cache for 60 seconds
+      const userResponse = await fetch("/api/auth/session", {
+        next: { revalidate: 60 }, // Cache for 60 seconds
       });
       const userData = await userResponse.json();
-      
+
       if (userData.success && userData.user) {
         setUser(userData.user);
       }
-      
+
       return data.session;
     } catch (err) {
       setError(err.message);
@@ -76,23 +82,23 @@ export function AuthProvider({ children }) {
   const register = async (email, password, name) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password, name }),
-        cache: 'no-store' // Don't cache POST requests
+        cache: "no-store", // Don't cache POST requests
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || "Registration failed");
       }
-      
+
       // Auto login after registration
       return await login(email, password);
     } catch (err) {
@@ -107,28 +113,27 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/auth/session', {
-        method: 'DELETE',
-        cache: 'no-store' // Don't cache DELETE requests
+      const response = await fetch("/api/auth/session", {
+        method: "DELETE",
+        cache: "no-store", // Don't cache DELETE requests
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
-        console.warn('Logout API failed:', data.error);
+        console.warn("Logout API failed:", data.error);
       }
-      
+
       // Always clear user state regardless of API response
       setUser(null);
-      
+
       // Optional: Redirect to login page
       // window.location.href = '/auth/login';
-      
     } catch (err) {
-      console.error('Logout error:', err);
-      setError('Logout failed');
+      console.error("Logout error:", err);
+      setError("Logout failed");
       // Still clear user state on error
       setUser(null);
     } finally {
@@ -155,7 +160,7 @@ export function AuthProvider({ children }) {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

@@ -148,11 +148,12 @@ export default function Home() {
 
     try {
       const cleanMessage = removeEmojis(formState.message);
+
+      const keyUsed = formState.key || generateKey(12);
       const encryptedMessage = encrypt(
         cleanMessage,
-        formState.key || undefined
+        keyUsed
       );
-      const keyUsed = formState.key || "Auto-generated";
 
       setFormState((prev) => ({
         ...prev,

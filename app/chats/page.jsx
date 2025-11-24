@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import DotGrid from "@/components/ui/DotGrid";
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 
 export default function ChatsPage() {
   const { user } = useAuth();
@@ -165,14 +166,11 @@ export default function ChatsPage() {
               </div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {rooms.map((room, index) => (
+                {rooms.map((room) => (
                   <Link key={room.$id} href={`/chats/${room.$id}`}>
                     <Card
                       className={`group relative overflow-hidden backdrop-blur-xl bg-gradient-to-br border border-border hover:border-border/60 transition-all duration-500 ease-linear hover:shadow-2xl hover:shadow-slate-500/20 cursor-pointer`}
                     >
-                      {/* Glow Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-500/0 via-slate-500/5 to-zinc-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
                       {/* Content */}
                       <CardContent className="relative p-4">
                         {/* Header */}
@@ -181,10 +179,14 @@ export default function ChatsPage() {
                             <div
                               className={`w-12 h-12 bg-gradient-to-r rounded-xl flex items-center justify-center shadow-lg`}
                             >
-                              <MessageCircle className="h-6 w-6 text-white" />
+                              {room.roomType === "personal" ? (
+                                <InitialsAvatar user={user} size={32}/>
+                              ) : (
+                                <MessageCircle className="h-6 w-6 text-white" />
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-foreground text-lg truncate group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-slate-500 group-hover:to-zinc-500 group-hover:bg-clip-text transition-all duration-300">
+                              <h3 className="text-foreground text-lg truncate group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-slate-500 group-hover:to-zinc-500 group-hover:bg-clip-text transition-all duration-300 w-[90%] font-tomorrow">
                                 {room.name}
                               </h3>
                               <p className="text-sm text-muted-foreground">
@@ -197,14 +199,16 @@ export default function ChatsPage() {
                         {/* Stats */}
                         <div className="space-y-3 mb-4">
                           <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center space-x-2 text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>
-                                {room.members.length} member
-                                {room.members.length !== 1 ? "s" : ""}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-muted-foreground">
+                            {room.roomType !== "personal" && (
+                              <div className="flex items-center space-x-2 text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>
+                                  {room.members.length} member
+                                  {room.members.length !== 1 ? "s" : ""}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex items-center space-x-2 text-muted-foreground self-end ml-auto">
                               <Clock className="h-4 w-4" />
                               <span>{room.retention}</span>
                             </div>

@@ -254,7 +254,7 @@ export async function generateKey(
     includeUppercase?: boolean;
     includeLowercase?: boolean;
     excludeSimilar?: boolean; // Exclude similar looking characters like 0, O, l, 1, I
-    customChars?: string; // Custom character set to use instead
+    customWorded?: string; // Custom character set to use instead
   }
 ): Promise<string> {
   // Default character sets
@@ -265,19 +265,71 @@ export async function generateKey(
   const similarChars = "0Ol1I"; // Characters that look similar
 
   let chars = "";
+  let customPrefix = "";
 
-  // If custom characters are provided, use them exclusively
-  if (options?.customChars) {
-    chars = options.customChars;
+  // Build character set based on options (defaults to all types for encryption keys)
+  const includeNumbers = options?.includeNumbers ?? true;
+  const includeSpecialChars = options?.includeSpecialChars ?? true;
+  const includeUppercase = options?.includeUppercase ?? true;
+  const includeLowercase = options?.includeLowercase ?? true;
+  const excludeSimilar = options?.excludeSimilar ?? false;
+
+  // If custom characters are provided, process them as prefix
+  if (options?.customWorded) {
+    // Apply case transformations to custom characters based on selected options
+    const customWorded = options.customWorded;
+    let processedCustom = "";
+    
+    for (let i = 0; i < customWorded.length; i++) {
+      const char = customWorded[i];
+      const isLetter = /[a-zA-Z]/.test(char);
+      
+      if (isLetter) {
+        const isUpperCase = char === char.toUpperCase();
+        const isLowerCase = char === char.toLowerCase();
+        
+        // Apply case transformation based on options
+        if (includeUppercase && includeLowercase) {
+          // Keep original case if both are selected
+          processedCustom += char;
+        } else if (includeUppercase && !includeLowercase) {
+          // Convert to uppercase
+          processedCustom += char.toUpperCase();
+        } else if (includeLowercase && !includeUppercase) {
+          // Convert to lowercase
+          processedCustom += char.toLowerCase();
+        } else {
+          // Neither selected, keep original
+          processedCustom += char;
+        }
+      } else {
+        // Non-letter characters (numbers, special chars) keep as-is
+        processedCustom += char;
+      }
+    }
+    
+    customPrefix = processedCustom;
+    
+    // Build character set for the remaining length from selected types
+    if (includeLowercase) chars += lowercase;
+    if (includeUppercase) chars += uppercase;
+    if (includeNumbers) chars += numbers;
+    if (includeSpecialChars) chars += specialChars;
+    
+    // Remove similar characters if requested
+    if (excludeSimilar) {
+      chars = chars
+        .split("")
+        .filter((char) => !similarChars.includes(char))
+        .join("");
+    }
+    
+    // Fallback to lowercase if no character types are selected
+    if (!chars) {
+      chars = lowercase;
+    }
   } else {
-    // Build character set based on options (defaults to all types for encryption keys)
-    const includeNumbers = options?.includeNumbers ?? true;
-    const includeSpecialChars = options?.includeSpecialChars ?? true;
-    const includeUppercase = options?.includeUppercase ?? true;
-    const includeLowercase = options?.includeLowercase ?? true;
-    const excludeSimilar = options?.excludeSimilar ?? false;
-
-    // Build the character set
+    // No custom characters - build character set normally
     if (includeLowercase) chars += lowercase;
     if (includeUppercase) chars += uppercase;
     if (includeNumbers) chars += numbers;
@@ -298,20 +350,22 @@ export async function generateKey(
   }
 
   const charsLength = chars.length;
-  const result = new Array(length);
+  const remainingLength = Math.max(0, length - customPrefix.length);
+  const result = new Array(remainingLength);
 
+  // Generate random characters for the remaining length
   // Check if we're in Node.js environment
   if (typeof window === "undefined") {
     try {
       const { randomBytes } = await import("crypto");
-      const randomBytesArray = randomBytes(length * 4);
+      const randomBytesArray = randomBytes(remainingLength * 4);
 
-      for (let i = 0; i < length; i++) {
+      for (let i = 0; i < remainingLength; i++) {
         const randomValue = randomBytesArray.readUInt32BE(i * 4);
         result[i] = chars.charAt(randomValue % charsLength);
       }
 
-      return result.join("");
+      return customPrefix + result.join("");
     } catch (error) {
       // Fall through to browser crypto or Math.random
     }
@@ -323,20 +377,20 @@ export async function generateKey(
     window.crypto &&
     window.crypto.getRandomValues
   ) {
-    const randomValues = new Uint32Array(length);
+    const randomValues = new Uint32Array(remainingLength);
     window.crypto.getRandomValues(randomValues);
 
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < remainingLength; i++) {
       result[i] = chars.charAt(randomValues[i] % charsLength);
     }
   } else {
     // Final fallback
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < remainingLength; i++) {
       result[i] = chars.charAt(Math.floor(Math.random() * charsLength));
     }
   }
 
-  return result.join("");
+  return customPrefix + result.join("");
 }
 
 // Clear the seed cache when the module is hot reloaded (for development)

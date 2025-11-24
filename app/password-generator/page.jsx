@@ -35,6 +35,22 @@ import Link from "next/link";
 
 const COPY_TIMEOUT = 2000;
 
+// Word list for readable passwords (3-6 characters)
+const WORD_LIST = [
+  "cat", "dog", "sun", "moon", "star", "tree", "bird", "fish",
+  "book", "door", "fire", "wind", "rain", "snow", "blue", "red",
+  "car", "bus", "pen", "cup", "hat", "key", "map", "box",
+  "egg", "ice", "jar", "net", "owl", "pig", "rat", "tea",
+  "love", "hope", "joy", "peace", "light", "magic", "dream", "wish",
+  "play", "dance", "smile", "happy", "brave", "smart", "quick", "swift",
+  "apple", "bread", "chair", "desk", "earth", "flame", "green", "house",
+  "island", "jungle", "kite", "lion", "music", "night", "ocean", "panda",
+  "queen", "river", "sky", "tiger", "unity", "valley", "water", "zebra",
+  "beach", "cloud", "daisy", "eagle", "frost", "gold", "heart", "iris",
+  "jade", "karma", "lotus", "mango", "ninja", "orbit", "pearl", "ruby",
+  "sage", "tulip", "ultra", "viper", "wave", "xenon", "yoga", "zeal"
+];
+
 export default function PasswordGenerator() {
   const [formState, setFormState] = useState({
     length: [9],
@@ -43,7 +59,9 @@ export default function PasswordGenerator() {
     includeUppercase: true,
     includeLowercase: true,
     excludeSimilar: false,
-    customChars: "",
+    useCustomWord: false,
+    useReadablePassword: false,
+    customWorded: "",
     generatedPassword: "",
     showPassword: true,
   });
@@ -67,12 +85,15 @@ export default function PasswordGenerator() {
       includeUppercase,
       includeLowercase,
       excludeSimilar,
-      customChars,
+      useCustomWord,
+      useReadablePassword,
+      customWorded,
     } = formState;
 
     // Validate at least one character type is selected
     if (
-      !customChars &&
+      !customWorded &&
+      !useReadablePassword &&
       !includeNumbers &&
       !includeSpecialChars &&
       !includeUppercase &&
@@ -85,16 +106,36 @@ export default function PasswordGenerator() {
       return;
     }
 
+    // Validate custom word is provided if useCustomWord is enabled
+    if (useCustomWord && !customWorded) {
+      toast.error("Custom Word Required", {
+        description: "Please enter a custom word or disable the custom word option",
+      });
+      return;
+    }
+
     setIsGenerating(true);
 
     try {
+      let wordToUse = "";
+      
+      // Determine which word to use
+      if (useReadablePassword) {
+        // Pick a random word from the word list
+        const randomIndex = Math.floor(Math.random() * WORD_LIST.length);
+        wordToUse = WORD_LIST[randomIndex];
+      } else if (useCustomWord && customWorded) {
+        // Use the custom word
+        wordToUse = customWorded;
+      }
+
       const options = {
         includeNumbers,
         includeSpecialChars,
         includeUppercase,
         includeLowercase,
         excludeSimilar,
-        customChars: customChars || undefined,
+        customWorded: wordToUse || undefined,
       };
 
       const password = await generateKey(length[0], options);
@@ -137,7 +178,9 @@ export default function PasswordGenerator() {
     setFormState((prev) => ({
       ...prev,
       generatedPassword: "",
-      customChars: "",
+      customWorded: "",
+      useCustomWord: false,
+      useReadablePassword: false,
     }));
     setCopyState(false);
     toast("Cleared", {
@@ -242,7 +285,12 @@ export default function PasswordGenerator() {
 
             {/* Character Options */}
             <div className="space-y-3 sm:space-y-4">
-              <Label className="text-sm sm:text-base">Character Types</Label>
+              <div className="flex justify-between">
+                <Label className="text-sm sm:text-base">Character Types</Label>
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Select all of them for best results!
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -310,39 +358,75 @@ export default function PasswordGenerator() {
             {/* Additional Options */}
             <div className="space-y-3 sm:space-y-4">
               <Label className="text-sm sm:text-base">Additional Options</Label>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="excludeSimilar"
-                  checked={formState.excludeSimilar}
-                  onCheckedChange={(checked) =>
-                    handleOptionChange("excludeSimilar", checked)
-                  }
-                />
-                <Label htmlFor="excludeSimilar" className="text-xs sm:text-sm">
-                  Exclude similar characters (0, O, l, 1, I)
-                </Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="excludeSimilar"
+                    checked={formState.excludeSimilar}
+                    onCheckedChange={(checked) =>
+                      handleOptionChange("excludeSimilar", checked)
+                    }
+                  />
+                  <Label htmlFor="excludeSimilar" className="text-xs sm:text-sm">
+                    Exclude similar characters (0, O, l, 1, I)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="useCustomWord"
+                    checked={formState.useCustomWord}
+                    onCheckedChange={(checked) => {
+                      handleOptionChange("useCustomWord", checked);
+                      if (checked) {
+                        handleOptionChange("useReadablePassword", false);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="useCustomWord" className="text-xs sm:text-sm">
+                    Use custom word (3-6 characters)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="useReadablePassword"
+                    checked={formState.useReadablePassword}
+                    onCheckedChange={(checked) => {
+                      handleOptionChange("useReadablePassword", checked);
+                      if (checked) {
+                        handleOptionChange("useCustomWord", false);
+                        handleOptionChange("customWorded", "");
+                      }
+                    }}
+                  />
+                  <Label htmlFor="useReadablePassword" className="text-xs sm:text-sm">
+                    Generate readable password (uses random word)
+                  </Label>
+                </div>
               </div>
             </div>
 
-            {/* Custom Characters */}
-            <div className="space-y-2">
-              <Label htmlFor="customChars" className="text-sm sm:text-base">
-                Custom Characters (Optional)
-              </Label>
-              <Input
-                id="customChars"
-                placeholder="Enter custom characters to use instead of default sets"
-                value={formState.customChars}
-                onChange={(e) =>
-                  handleOptionChange("customChars", e.target.value)
-                }
-                className="text-sm"
-              />
-              <span className="text-muted-foreground text-xs sm:text-sm">
-                If provided, only these characters will be used (overrides other
-                options)
-              </span>
-            </div>
+            {/* Custom Worded Input - Only show when useCustomWord is enabled */}
+            {formState.useCustomWord && (
+              <div className="space-y-2">
+                <Label htmlFor="customWorded" className="text-sm sm:text-base">
+                  Custom Word
+                </Label>
+                <Input
+                  id="customWorded"
+                  placeholder="Enter a custom word (3-6 characters)"
+                  minLength={3}
+                  maxLength={6}
+                  value={formState.customWorded}
+                  onChange={(e) =>
+                    handleOptionChange("customWorded", e.target.value)
+                  }
+                  className="text-sm"
+                />
+                <span className="text-muted-foreground text-xs sm:text-sm">
+                  This word will start your password and be followed by complex characters
+                </span>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

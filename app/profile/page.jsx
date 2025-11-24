@@ -52,9 +52,12 @@ import {
   Shield,
   Zap,
   LogOut,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ProfilePage() {
   const { user, logout, loading } = useAuth();
@@ -74,6 +77,7 @@ export default function ProfilePage() {
     }
 
     if (user) {
+      console.log(user);
       fetchApiKeys();
       fetchRateLimitStatus();
     }
@@ -201,9 +205,10 @@ export default function ProfilePage() {
     });
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/auth/login");
+  const handleLogout = () => {
+    logout().then(() => {
+      router.push("/auth/login");
+    });
   };
 
   const getTierIcon = (tier) => {
@@ -259,8 +264,14 @@ export default function ProfilePage() {
                   {rateLimitStatus.tier}
                 </Badge>
               )}
+              {user.emailVerification && (
+                <Badge variant="success">
+                  <CheckCircle className="w-4 h-4" />
+                  Verified
+                </Badge>
+              )}
             </CardTitle>
-            <CardDescription className="font-tomorrow text-sm">
+            <CardDescription className="font-tomorrow text-sm text-muted-foreground">
               {user?.email || "user@example.com"}
             </CardDescription>
           </div>
@@ -283,11 +294,13 @@ export default function ProfilePage() {
 
           <TabsContent value="account" className="space-y-4">
             <div>
-              <h3 className="text-base font-medium">Account Details</h3>
-              <p className="text-sm">
+              <h3 className="text-lg text-white font-medium">
+                Account Details
+              </h3>
+              <p className="text-sm text-muted-foreground">
                 Subscription: {user?.subscriptionTier || "Free"}
               </p>
-              <p className="text-sm">
+              <p className="text-sm text-muted-foreground">
                 Joined:{" "}
                 {user?.$createdAt
                   ? new Date(user.$createdAt).toLocaleDateString()
@@ -296,11 +309,49 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <h3 className="text-base font-medium">Session Information</h3>
-              <p className="text-sm">
+              <h3 className="text-lg text-white font-medium">
+                Session Information
+              </h3>
+              <p className="text-sm text-muted-foreground">
                 Your session will expire in 3 days from login.
               </p>
             </div>
+            {!user.emailVerification && (
+              <Alert variant={"warning"}>
+                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <AlertTitle className="text-sm sm:text-base">
+                  Email Not Verified
+                </AlertTitle>
+                <AlertDescription className="text-xs sm:text-sm">
+                  Please verify your email address to unlock all features.
+                  <Button
+                    variant="link"
+                    className="p-0 ms-1 align-baseline"
+                    onClick={() => router.push("/auth/verify-email")}
+                  >
+                    Resend Verification Email
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+            {user.emailVerification && !user.mfa && (
+              <Alert variant={"warning"}>
+                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <AlertTitle className="text-sm sm:text-base">
+                  MFA Not Enabled
+                </AlertTitle>
+                <AlertDescription className="text-xs sm:text-sm">
+                  Please enable MFA to enhance your account security.
+                  <Button
+                    variant="link"
+                    className="p-0 ms-1 align-baseline"
+                    onClick={() => router.push("/auth/setup-mfa")}
+                  >
+                    Set Up MFA
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           <TabsContent value="developer" className="space-y-4">
@@ -352,7 +403,7 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm text-muted-foreground">
                         <span>Daily Usage</span>
                         <span>
                           {rateLimitStatus.used} / {rateLimitStatus.limit}
@@ -566,7 +617,7 @@ export default function ProfilePage() {
               <h4 className="font-medium mb-3 text-gray-50">
                 🚀 API Rate Limits
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2 p-2 bg-blue-500/50 rounded">
                   <Zap className="w-4 h-4 text-blue-900" />
                   <div>

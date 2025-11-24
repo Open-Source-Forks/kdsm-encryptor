@@ -14,11 +14,40 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
+    // Validate input
+    if (!email || !password) {
+      return NextResponse.json(
+        { success: false, error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
     // Create email session
     const session = await account.createEmailPasswordSession(email, password);
     
+    // Get user details with the new session
+    const sessionClient = new Client()
+      .setEndpoint(config.endpoint)
+      .setProject(config.project_id)
+      .setSession(session.secret);
+    
+    const sessionAccount = new Account(sessionClient);
+    const user = await sessionAccount.get();
+    
     // Set the session cookie
-    const response = NextResponse.json({ success: true, session });
+    const response = NextResponse.json({ 
+      success: true, 
+      session,
+      user: {
+        $id: user.$id,
+        email: user.email,
+        name: user.name,
+        emailVerification: user.emailVerification,
+        registration: user.registration
+      },
+      message: !user.emailVerification ? "Please verify your email address" : "Login successful"
+    });
+    
     response.cookies.set("kdsm-session", session.secret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -30,9 +59,20 @@ export async function POST(request) {
     return response;
   } catch (error) {
     console.error("Session creation error:", error);
+    
+    let errorMessage = "Authentication failed";
+    let statusCode = 401;
+    
+    if (error.code === 401) {
+      errorMessage = "Invalid email or password";
+    } else if (error.code === 429) {
+      errorMessage = "Too many login attempts. Please try again later";
+      statusCode = 429;
+    }
+    
     return NextResponse.json(
-      { success: false, error: "Authentication failed" },
-      { status: 401 }
+      { success: false, error: errorMessage },
+      { status: statusCode }
     );
   }
 }
@@ -88,7 +128,7 @@ export async function GET(request) {
 
     if (!sessionToken) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "No active session" },
         { status: 401 }
       );
     }
@@ -104,13 +144,33 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
-      user,
+      user: {
+        $id: user.$id,
+        email: user.email,
+        name: user.name,
+        emailVerification: user.emailVerification,
+        registration: user.registration,
+        status: user.status,
+        labels: user.labels
+      },
+      session: {
+        isValid: true,
+        requiresVerification: !user.emailVerification
+      }
     });
   } catch (error) {
     console.error("Session verification error:", error);
-    return NextResponse.json(
-      { success: false, error: "Invalid session" },
+    
+    // Clear invalid session cookie
+    const response = NextResponse.json(
+      { success: false, error: "Invalid or expired session" },
       { status: 401 }
     );
+    
+    response.cookies.delete("kdsm-session", {
+      path: "/",
+    });
+    
+    return response;
   }
 }

@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const { login } = useAuth();
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function LoginPage() {
         description:
           err.message || "Login failed. Please check your credentials.",
       });
+      setFailed(true);
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +77,8 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              maxLength={16}
+              minLength={8}
               required
             />
           </div>
@@ -83,7 +87,15 @@ export default function LoginPage() {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex justify-center flex-col items-center space-y-2">
+        {failed && (
+          <p className="text-sm">
+            Forgot password?{" "}
+            <Link href="/auth/reset-password" className="underline">
+              Reset it
+            </Link>
+          </p>
+        )}
         <p className="text-sm">
           Don't have an account?{" "}
           <Link href="/auth/register" className="underline">

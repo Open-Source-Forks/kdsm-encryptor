@@ -223,7 +223,8 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              maxLength={20}
+              maxLength={16}
+              minLength={8}
               required
             />
             {/* Password strength indicator */}
@@ -263,7 +264,8 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              maxLength={20}
+              maxLength={16}
+              minLength={8}
               required
             />
           </div>
