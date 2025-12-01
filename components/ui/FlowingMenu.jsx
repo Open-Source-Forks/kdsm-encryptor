@@ -19,9 +19,9 @@ const ITEMS = [
     link: "/readme#api-documentation",
   },
   {
-    title: "Profile Management",
-    imageNumber: "3",
-    link: "/profile",
+    title: "Password Generator",
+    imageNumber: "6",
+    link: "/password-generator",
   },
   {
     title: "Contribute",

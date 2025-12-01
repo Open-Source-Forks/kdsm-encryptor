@@ -32,24 +32,9 @@ import { motion } from "framer-motion";
 import FlowingMenu from "@/components/ui/FlowingMenu";
 import TextType from "@/components/ui/TextType";
 import Link from "next/link";
+import { WORD_LIST } from "@/utils/constants";
 
 const COPY_TIMEOUT = 2000;
-
-// Word list for readable passwords (3-6 characters)
-const WORD_LIST = [
-  "cat", "dog", "sun", "moon", "star", "tree", "bird", "fish",
-  "book", "door", "fire", "wind", "rain", "snow", "blue", "red",
-  "car", "bus", "pen", "cup", "hat", "key", "map", "box",
-  "egg", "ice", "jar", "net", "owl", "pig", "rat", "tea",
-  "love", "hope", "joy", "peace", "light", "magic", "dream", "wish",
-  "play", "dance", "smile", "happy", "brave", "smart", "quick", "swift",
-  "apple", "bread", "chair", "desk", "earth", "flame", "green", "house",
-  "island", "jungle", "kite", "lion", "music", "night", "ocean", "panda",
-  "queen", "river", "sky", "tiger", "unity", "valley", "water", "zebra",
-  "beach", "cloud", "daisy", "eagle", "frost", "gold", "heart", "iris",
-  "jade", "karma", "lotus", "mango", "ninja", "orbit", "pearl", "ruby",
-  "sage", "tulip", "ultra", "viper", "wave", "xenon", "yoga", "zeal"
-];
 
 export default function PasswordGenerator() {
   const [formState, setFormState] = useState({
@@ -109,7 +94,8 @@ export default function PasswordGenerator() {
     // Validate custom word is provided if useCustomWord is enabled
     if (useCustomWord && !customWorded) {
       toast.error("Custom Word Required", {
-        description: "Please enter a custom word or disable the custom word option",
+        description:
+          "Please enter a custom word or disable the custom word option",
       });
       return;
     }
@@ -118,7 +104,7 @@ export default function PasswordGenerator() {
 
     try {
       let wordToUse = "";
-      
+
       // Determine which word to use
       if (useReadablePassword) {
         // Pick a random word from the word list
@@ -236,7 +222,7 @@ export default function PasswordGenerator() {
               src="/icons/6.png"
               width={86}
               height={86}
-              className="me-2 object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-[86px] md:h-[86px]"
+              className="me-2 object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-[86px] md:h-[86px] pointer-events-none"
               alt="KDSM Logo"
             />
             <div
@@ -367,7 +353,10 @@ export default function PasswordGenerator() {
                       handleOptionChange("excludeSimilar", checked)
                     }
                   />
-                  <Label htmlFor="excludeSimilar" className="text-xs sm:text-sm">
+                  <Label
+                    htmlFor="excludeSimilar"
+                    className="text-xs sm:text-sm"
+                  >
                     Exclude similar characters (0, O, l, 1, I)
                   </Label>
                 </div>
@@ -398,7 +387,10 @@ export default function PasswordGenerator() {
                       }
                     }}
                   />
-                  <Label htmlFor="useReadablePassword" className="text-xs sm:text-sm">
+                  <Label
+                    htmlFor="useReadablePassword"
+                    className="text-xs sm:text-sm"
+                  >
                     Generate readable password (uses random word)
                   </Label>
                 </div>
@@ -423,7 +415,8 @@ export default function PasswordGenerator() {
                   className="text-sm"
                 />
                 <span className="text-muted-foreground text-xs sm:text-sm">
-                  This word will start your password and be followed by complex characters
+                  This word will start your password and be followed by complex
+                  characters
                 </span>
               </div>
             )}

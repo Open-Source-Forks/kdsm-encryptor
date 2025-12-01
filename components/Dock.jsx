@@ -12,7 +12,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="KDSM icon"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/",
@@ -25,7 +25,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="KDSM icon"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/readme",
@@ -38,7 +38,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="Profile icon"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/profile",
@@ -51,7 +51,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="KDSM chats Logo"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/chats",
@@ -64,7 +64,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="KDSM Password generator Logo"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/password-generator",
@@ -77,7 +77,7 @@ export function Dock() {
           width={55}
           height={55}
           alt="KDSM Contribute Logo"
-          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300"
+          className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
       href: "/contribute",

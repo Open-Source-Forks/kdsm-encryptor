@@ -1296,7 +1296,6 @@ pre {
   height: 100%;
   position: relative;
   cursor: pointer;
-  text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
   font-weight: 600;
@@ -1346,7 +1345,6 @@ pre {
 .marquee span {
   color: #060010;
   white-space: nowrap;
-  text-transform: uppercase;
   font-weight: 400;
   font-size: clamp(1.2rem, 4vh, 2.5rem);
   line-height: 1.2;

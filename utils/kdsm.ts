@@ -285,13 +285,11 @@ export async function generateKey(
       const isLetter = /[a-zA-Z]/.test(char);
       
       if (isLetter) {
-        const isUpperCase = char === char.toUpperCase();
-        const isLowerCase = char === char.toLowerCase();
-        
         // Apply case transformation based on options
         if (includeUppercase && includeLowercase) {
-          // Keep original case if both are selected
-          processedCustom += char;
+          // Apply random mixed casing when both are selected
+          const randomCase = Math.random() < 0.5;
+          processedCustom += randomCase ? char.toUpperCase() : char.toLowerCase();
         } else if (includeUppercase && !includeLowercase) {
           // Convert to uppercase
           processedCustom += char.toUpperCase();

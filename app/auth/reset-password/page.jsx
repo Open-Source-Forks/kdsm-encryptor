@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { CheckCircle, Mail, Loader2, Lock } from "lucide-react";
 
-export default function ResetPasswordPage() {
-  const [step, setStep] = useState("request"); // request, reset, success
+function ResetPasswordContent() {
+  const [step, setStep] = useState("request");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordAgain, setPasswordAgain] = useState("");
@@ -29,13 +29,13 @@ export default function ResetPasswordPage() {
   const userId = searchParams.get("userId");
   const secret = searchParams.get("secret");
 
-  // If URL contains reset parameters, show reset form
   useEffect(() => {
     if (userId && secret) {
       setStep("reset");
     }
   }, [userId, secret]);
 
+  // ... rest of your handlers remain the same ...
   const handleRequestReset = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -115,7 +115,6 @@ export default function ResetPasswordPage() {
           description: "You can now log in with your new password.",
         });
         
-        // Redirect to login after 2 seconds
         setTimeout(() => {
           router.push("/auth/login");
         }, 2000);
@@ -299,5 +298,13 @@ export default function ResetPasswordPage() {
       {step === "reset" && renderResetForm()}
       {step === "success" && renderSuccess()}
     </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<Card className="w-full max-w-md text-primary bg-secondary/40 backdrop-blur-md shadow-lg"><CardContent className="p-6">Loading...</CardContent></Card>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

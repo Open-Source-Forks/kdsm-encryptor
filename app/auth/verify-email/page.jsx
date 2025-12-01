@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,13 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState("pending"); // pending, success, error
+  const [verificationStatus, setVerificationStatus] = useState("pending");
   const [isResending, setIsResending] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -26,7 +25,6 @@ export default function VerifyEmailPage() {
   const userId = searchParams.get("userId");
   const secret = searchParams.get("secret");
 
-  // Auto-verify if URL contains verification parameters
   useEffect(() => {
     if (userId && secret) {
       handleVerification();
@@ -66,7 +64,6 @@ export default function VerifyEmailPage() {
           description: "Your email has been verified successfully.",
         });
 
-        // Redirect to profile after 3 seconds
         setTimeout(() => {
           router.push("/profile");
         }, 3000);
@@ -205,7 +202,6 @@ export default function VerifyEmailPage() {
       );
     }
 
-    // Default state when no URL parameters
     return (
       <div className="flex flex-col items-center space-y-4">
         <Mail className="h-16 w-16 text-primary" />
@@ -264,5 +260,24 @@ export default function VerifyEmailPage() {
         {renderContent()}
       </CardContent>
     </Card>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <Card className="w-full max-w-md text-primary bg-secondary/40 backdrop-blur-md shadow-lg">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-center text-sm text-muted-foreground">
+              Loading...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
