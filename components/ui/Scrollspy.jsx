@@ -12,7 +12,7 @@ const Scrollspy = ({ sections }) => {
   useEffect(() => {
     // Set up intersection observer
     const options = {
-      rootMargin: "-10% 0% -80% 0%",
+      rootMargin: "-120px 0% -40% 0%",
       threshold: 0,
     };
 
@@ -40,8 +40,10 @@ const Scrollspy = ({ sections }) => {
   const handleClick = (id) => {
     const element = document.getElementById(id);
     if (element) {
+      // Get the element's position and account for scroll offset (scroll-mt-24 = 96px)
+      const offsetTop = element.getBoundingClientRect().top + window.pageYOffset - 96;
       window.scrollTo({
-        top: element.offsetTop,
+        top: offsetTop,
         behavior: "smooth",
       });
       setIsSidebarOpen(false); // Close sidebar on item click

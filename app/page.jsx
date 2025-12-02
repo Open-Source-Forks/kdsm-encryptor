@@ -1,5 +1,5 @@
 "use client";
-
+// Todo sharable link with encrypted message
 import { useRef, useState, useCallback, useMemo } from "react";
 import {
   Card,
@@ -42,6 +42,8 @@ const KEY_END_MARKER = "[KDSM_KEY_END]";
 const EMOJI_REGEX =
   /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]|[\u{FE00}-\u{FE0F}]|[\u{1F004}]|[\u{1F0CF}]|[\u{1F18E}]|[\u{3030}]|[\u{2B50}]|[\u{2B55}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{3297}]|[\u{3299}]|[\u{303D}]|[\u{00A9}]|[\u{00AE}]|[\u{2122}]|[\u{23F3}]|[\u{24C2}]|[\u{23E9}-\u{23F3}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]/gu;
 const COPY_TIMEOUT = 2000;
+const MAX_MESSAGE_LENGTH = 20000;
+const MAX_KEY_LENGTH = 200;
 
 export default function Home() {
   // State management with useState hooks
@@ -149,11 +151,8 @@ export default function Home() {
     try {
       const cleanMessage = removeEmojis(formState.message);
 
-      const keyUsed = formState.key || generateKey(12);
-      const encryptedMessage = encrypt(
-        cleanMessage,
-        keyUsed
-      );
+      const keyUsed = formState.key || (await generateKey(12));
+      const encryptedMessage = encrypt(cleanMessage, keyUsed);
 
       setFormState((prev) => ({
         ...prev,
@@ -329,7 +328,22 @@ export default function Home() {
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck="false"
+                  maxLength={MAX_MESSAGE_LENGTH}
                 />
+                <div className="flex justify-end">
+                  <span
+                    className={`text-xs sm:text-sm ${
+                      formState.message.length > MAX_MESSAGE_LENGTH * 0.9
+                        ? "text-destructive font-semibold"
+                        : formState.message.length > MAX_MESSAGE_LENGTH * 0.75
+                        ? "text-orange-500"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {formState.message.length.toLocaleString()} /{" "}
+                    {MAX_MESSAGE_LENGTH.toLocaleString()} characters
+                  </span>
+                </div>
                 <Alert>
                   <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                   <AlertTitle className="text-sm sm:text-base">
@@ -369,7 +383,22 @@ export default function Home() {
                   autoCorrect="off"
                   spellCheck="false"
                   inputMode="text"
+                  maxLength={MAX_KEY_LENGTH}
+                  secured={true}
                 />
+                <div className="flex justify-end">
+                  <span
+                    className={`text-xs sm:text-sm ${
+                      formState.key.length > MAX_KEY_LENGTH * 0.9
+                        ? "text-destructive font-semibold"
+                        : formState.key.length > MAX_KEY_LENGTH * 0.75
+                        ? "text-orange-500"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {formState.key.length} / {MAX_KEY_LENGTH} characters
+                  </span>
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -545,8 +574,10 @@ export default function Home() {
                 cursorCharacter="|"
               />
             </Link>
-            <CardFooter className="flex-col">
+            <div>
               <FlowingMenu />
+            </div>
+            <CardFooter className="flex-col">
               <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0 mt-8">
                 <ShinyText
                   text="KDSM Encryptor by - Idris Vohra"

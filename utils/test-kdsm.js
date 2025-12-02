@@ -34,7 +34,7 @@ export function runKDSMTests() {
       console.error(`❌ FAILED: ${name}`, error.message);
     }
   }
-
+  // previously tested with 27k up chars IG it works well till 100k chars (Password length also plays a huge role)
   // Test: Performance benchmark for long input
   runTest("Performance benchmark - Long input encryption/decryption", () => {
     const message = `Plan to rob a bank ^_~ (Spoof)

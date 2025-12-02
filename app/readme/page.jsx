@@ -15,11 +15,12 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { FAQs } from "@/utils/constants";
 function Faq({ question, answer }) {
   return (
     <AccordionItem value={question}>
       <AccordionTrigger>
-        <h3>{question}</h3>
+        <h3 className="cursor-pointer">{question}</h3>
       </AccordionTrigger>
       <AccordionContent>
         <p className="text-sm text-muted-foreground">{answer}</p>
@@ -43,48 +44,7 @@ export default function ReadmePage() {
     { id: "encryption-api", title: "Encryption API" },
     { id: "faqs", title: "FAQs" },
   ];
-  const FAQs = [
-    {
-      question: "Can I recover my message if I lose the key?",
-      answer:
-        "No. Without the exact key used for encryption, it's not possible to decrypt the message. There is no recovery mechanism by design for security reasons.",
-    },
-    {
-      question: "How do I get an API key?",
-      answer:
-        "Sign up for an account, navigate to your Profile page, click on the Developer tab, and create a new API key. You can create up to 3 API keys per account.",
-    },
-    {
-      question: "What happens if I exceed the rate limit?",
-      answer:
-        "If you exceed your daily API call limit (10 for free users, 100 for premium), you'll receive a 429 error response. Rate limits reset daily at midnight UTC.",
-    },
-    {
-      question: "Can I use the API for commercial projects?",
-      answer:
-        "Yes, you can use the KDSM API for both personal and commercial projects. However, please respect the rate limits and terms of service.",
-    },
-    {
-      question: "Is KDSM encryption secure?",
-      answer:
-        "KDSM provides solid security for everyday communication needs. The encryption strength depends on key secrecy and proper implementation. For highly sensitive data, consider using established encryption standards.",
-    },
-    {
-      question: "What's the difference between API keys and encryption keys?",
-      answer:
-        "API keys authenticate your access to the KDSM service, while encryption keys are used to encrypt/decrypt your actual messages. Both are required but serve different purposes.",
-    },
-    {
-      question: "Is KDSM Open Source?",
-      answer:
-        "No, KDSM Encryptor is not an open-source project. The KDSM algorithm is proprietary and maintained by a select team to ensure security and integrity.",
-    },
-    {
-      question: "Can I delete my API keys?",
-      answer:
-        "Yes, you can delete API keys from your profile > developer tab. Once deleted, they are immediately revoked and cannot be restored. Make sure to update any applications using the deleted key.",
-    },
-  ];
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -114,8 +74,10 @@ export default function ReadmePage() {
 
   const CodeBlock = ({ children }) => (
     <div className="relative bg-secondary rounded-lg p-4">
-      <pre className="text-gray-100 text-sm">
-        <code>{children}</code>
+      <pre className="text-gray-100 text-sm overflow-x-auto overflow-y-hidden">
+        <code className="whitespace-pre-wrap break-words pointer-events-auto">
+          {children}
+        </code>
       </pre>
       <Button
         variant="ghost"
@@ -129,11 +91,11 @@ export default function ReadmePage() {
   );
 
   return (
-    <div>
+    <div className="w-full max-w-screen overflow-x-hidden overflow-y-auto">
       <div className="relative z-10">
         <ASCIIText
           text="KDSM"
-          enableWaves={true}
+          // enableWaves={true}
           planeBaseHeight={planeBaseHeight}
           textColor={"#fdf9f3"}
         />
@@ -329,15 +291,15 @@ export default function ReadmePage() {
               project with ease with our API for free!
             </p>
             <div className="bg-accent p-4 rounded-lg text-blue-400 mb-4">
-                <h4 className="font-medium mb-2 flex">
-                  <Info className="mr-2 size-5" />
-                  Important info
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Free for all (No API key required)</li>
-                  <li>• Usage is not monitored or rate-limited</li>
-                </ul>
-              </div>
+              <h4 className="font-medium mb-2 flex">
+                <Info className="mr-2 size-5" />
+                Important info
+              </h4>
+              <ul className="text-sm space-y-1">
+                <li>• Free for all (No API key required)</li>
+                <li>• Usage is not monitored or rate-limited</li>
+              </ul>
+            </div>
             <div>
               <h4 className="text-lg font-medium mb-2">
                 GET /password-generator
@@ -346,11 +308,50 @@ export default function ReadmePage() {
                 Generate a strong password via query parameters.
               </p>
               <h5 className="font-medium mb-2">Query Parameters:</h5>
-              <CodeBlock>{`length=12&includeNumbers=true&includeSpecialChars=true&includeUppercase=true&includeLowercase=true&excludeSimilar=false&customChars=`}</CodeBlock>
+              <CodeBlock>{`length=12&includeNumbers=true&includeSpecialChars=true&includeUppercase=true&includeLowercase=true&excludeSimilar=false&useCustomWord=false&customWord=&useReadablePassword=false`}</CodeBlock>
+              <div className="my-4 space-y-2 text-sm">
+                <p>
+                  <strong>New Parameters:</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      useCustomWord
+                    </code>{" "}
+                    - Enable custom word prefix (true/false)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      customWord
+                    </code>{" "}
+                    - Your custom word (3-14 characters, required if
+                    useCustomWord=true)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      useReadablePassword
+                    </code>{" "}
+                    - Enable random readable word (true/false)
+                  </li>
+                </ul>
+              </div>
               <h5 className="font-medium mb-2 mt-4">Response:</h5>
               <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>
-              <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
-              <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&includeNumbers=true&includeSpecialChars=true"`}</CodeBlock>
+              <h5 className="font-medium mb-2 mt-4">cURL Examples:</h5>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm mb-2">Basic password generation:</p>
+                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&includeNumbers=true&includeSpecialChars=true"`}</CodeBlock>
+                </div>
+                <div>
+                  <p className="text-sm mb-2">With readable password:</p>
+                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&useReadablePassword=true&includeNumbers=true&includeUppercase=true"`}</CodeBlock>
+                </div>
+                <div>
+                  <p className="text-sm mb-2">With custom word:</p>
+                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=15&useCustomWord=true&customWord=secure&includeNumbers=true"`}</CodeBlock>
+                </div>
+              </div>
             </div>
             <div>
               <h4 className="text-lg font-medium mb-2">
@@ -359,13 +360,76 @@ export default function ReadmePage() {
 
               <p className="mb-4">Generate a strong password via JSON body.</p>
               <h5 className="font-medium mb-2">Request Body:</h5>
-              <CodeBlock>{`{ "length": 12, "includeNumbers": true, "includeSpecialChars": true, "includeUppercase": true, "includeLowercase": true, "excludeSimilar": false, "customChars": "" }`}</CodeBlock>
+              <CodeBlock>{`{
+  "length": 12,
+  "includeNumbers": true,
+  "includeSpecialChars": true,
+  "includeUppercase": true,
+  "includeLowercase": true,
+  "excludeSimilar": false,
+  "useCustomWord": false,
+  "customWord": "",
+  "useReadablePassword": false
+}`}</CodeBlock>
+              <div className="my-4 space-y-2 text-sm">
+                <p>
+                  <strong>New Fields:</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      useCustomWord
+                    </code>{" "}
+                    - Enable custom word prefix
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      customWord
+                    </code>{" "}
+                    - Your custom word (3-14 characters)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      useReadablePassword
+                    </code>{" "}
+                    - Generate with random readable word
+                  </li>
+                </ul>
+              </div>
               <h5 className="font-medium mb-2 mt-4">Response:</h5>
               <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>
-              <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
-              <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+              <h5 className="font-medium mb-2 mt-4">cURL Examples:</h5>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm mb-2">Basic password generation:</p>
+                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
   -H "Content-Type: application/json" \
   -d '{ "length": 12, "includeNumbers": true }'`}</CodeBlock>
+                </div>
+                <div>
+                  <p className="text-sm mb-2">With readable password:</p>
+                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+  -H "Content-Type: application/json" \
+  -d '{
+    "length": 12,
+    "useReadablePassword": true,
+    "includeNumbers": true,
+    "includeUppercase": true
+  }'`}</CodeBlock>
+                </div>
+                <div>
+                  <p className="text-sm mb-2">With custom word:</p>
+                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+  -H "Content-Type: application/json" \
+  -d '{
+    "length": 15,
+    "useCustomWord": true,
+    "customWord": "moon",
+    "includeNumbers": true,
+    "includeSpecialChars": true
+  }'`}</CodeBlock>
+                </div>
+              </div>
             </div>
           </Section>
           <Section id="encryption-api" title="Encryption API v1">
@@ -728,7 +792,7 @@ except Exception as e:
             </div>
           </Section>
 
-          <Section id="faqs" title="FAQs">
+          <Section id="faqs" title="FAQs" className="mb-10">
             <div className="space-y-4">
               <Accordion
                 type="single"

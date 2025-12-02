@@ -241,6 +241,101 @@ export function decrypt(encrypted: string, key?: string): string {
 }
 
 /**
+ * Helper function to ensure password contains at least one character from each required type
+ * Optimized with O(n) time complexity and minimal string operations
+ * @param password - The generated password
+ * @param prefixLength - Length of the custom prefix (if any)
+ * @param charSets - Character sets to validate against
+ * @returns Password guaranteed to have all character types
+ */
+function ensureStrongPassword(
+  password: string,
+  prefixLength: number,
+  charSets: {
+    lowercase: string;
+    uppercase: string;
+    numbers: string;
+    specialChars: string;
+    excludeSimilar: boolean;
+  }
+): string {
+  const { lowercase, uppercase, numbers, specialChars, excludeSimilar } = charSets;
+  
+  // Single pass check for missing types - O(n)
+  let hasLowercase = false;
+  let hasUppercase = false;
+  let hasNumber = false;
+  let hasSpecial = false;
+  
+  for (let i = 0; i < password.length; i++) {
+    const code = password.charCodeAt(i);
+    if (code >= 97 && code <= 122) hasLowercase = true;
+    else if (code >= 65 && code <= 90) hasUppercase = true;
+    else if (code >= 48 && code <= 57) hasNumber = true;
+    else if ("!@#$%^&*()".indexOf(password[i]) !== -1) hasSpecial = true;
+    
+    if (hasLowercase && hasUppercase && hasNumber && hasSpecial) {
+      return password; // Early exit if all types present
+    }
+  }
+
+  const editableStart = prefixLength;
+  const editableLength = password.length - editableStart;
+
+  if (editableLength < 4) return password;
+
+  // Pre-filter character sets if excluding similar chars - O(1) since sets are small
+  const getFilteredSet = (charSet: string): string => {
+    if (!excludeSimilar) return charSet;
+    const similarChars = "0Ol1I";
+    let filtered = "";
+    for (let i = 0; i < charSet.length; i++) {
+      if (similarChars.indexOf(charSet[i]) === -1) {
+        filtered += charSet[i];
+      }
+    }
+    return filtered || charSet;
+  };
+
+  const lowerSet = getFilteredSet(lowercase);
+  const upperSet = getFilteredSet(uppercase);
+  const numberSet = getFilteredSet(numbers);
+  const specialSet = getFilteredSet(specialChars);
+
+  // Generate 4 unique random positions efficiently - O(1) expected time
+  const positions: number[] = [];
+  const missingTypes: string[] = [];
+  
+  if (!hasLowercase) missingTypes.push(lowerSet);
+  if (!hasUppercase) missingTypes.push(upperSet);
+  if (!hasNumber) missingTypes.push(numberSet);
+  if (!hasSpecial) missingTypes.push(specialSet);
+
+  if (missingTypes.length === 0) return password;
+
+  // Use Fisher-Yates to select random positions - O(k) where k is missing types
+  const availablePositions: number[] = [];
+  for (let i = editableStart; i < password.length; i++) {
+    availablePositions.push(i);
+  }
+
+  for (let i = 0; i < missingTypes.length; i++) {
+    const randomIndex = Math.floor(Math.random() * (availablePositions.length - i)) + i;
+    [availablePositions[i], availablePositions[randomIndex]] = [availablePositions[randomIndex], availablePositions[i]];
+    positions.push(availablePositions[i]);
+  }
+
+  // Build result efficiently - single allocation
+  const chars: string[] = Array.from(password);
+  for (let i = 0; i < missingTypes.length; i++) {
+    const charSet = missingTypes[i];
+    chars[positions[i]] = charSet[Math.floor(Math.random() * charSet.length)];
+  }
+
+  return chars.join("");
+}
+
+/**
  * Generates a random key that can be used for encryption/decryption or as a strong password
  * @param length - Length of the key to generate (default: 10)
  * @param options - Configuration options for character inclusion
@@ -274,121 +369,135 @@ export async function generateKey(
   const includeLowercase = options?.includeLowercase ?? true;
   const excludeSimilar = options?.excludeSimilar ?? false;
 
-  // If custom characters are provided, process them as prefix
+  // Build character set efficiently - O(1) since sets are constant size
+  const charParts: string[] = [];
+  if (includeLowercase) charParts.push(lowercase);
+  if (includeUppercase) charParts.push(uppercase);
+  if (includeNumbers) charParts.push(numbers);
+  if (includeSpecialChars) charParts.push(specialChars);
+  
+  chars = charParts.join("");
+
+  // Remove similar characters if requested - O(n) where n is charset size
+  if (excludeSimilar && chars) {
+    let filtered = "";
+    for (let i = 0; i < chars.length; i++) {
+      if (similarChars.indexOf(chars[i]) === -1) {
+        filtered += chars[i];
+      }
+    }
+    chars = filtered || lowercase;
+  }
+
+  // Fallback to lowercase if no character types are selected
+  if (!chars) chars = lowercase;
+
+  // Process custom word prefix with optimized character checking - O(m) where m is word length
   if (options?.customWorded) {
-    // Apply case transformations to custom characters based on selected options
     const customWorded = options.customWorded;
-    let processedCustom = "";
+    const prefixChars: string[] = new Array(customWorded.length);
     
     for (let i = 0; i < customWorded.length; i++) {
       const char = customWorded[i];
-      const isLetter = /[a-zA-Z]/.test(char);
+      const code = char.charCodeAt(0);
+      const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
       
       if (isLetter) {
-        // Apply case transformation based on options
         if (includeUppercase && includeLowercase) {
-          // Apply random mixed casing when both are selected
-          const randomCase = Math.random() < 0.5;
-          processedCustom += randomCase ? char.toUpperCase() : char.toLowerCase();
+          // Random mixed casing
+          prefixChars[i] = Math.random() < 0.5 ? char.toUpperCase() : char.toLowerCase();
         } else if (includeUppercase && !includeLowercase) {
-          // Convert to uppercase
-          processedCustom += char.toUpperCase();
+          prefixChars[i] = char.toUpperCase();
         } else if (includeLowercase && !includeUppercase) {
-          // Convert to lowercase
-          processedCustom += char.toLowerCase();
+          prefixChars[i] = char.toLowerCase();
         } else {
-          // Neither selected, keep original
-          processedCustom += char;
+          prefixChars[i] = char;
         }
       } else {
-        // Non-letter characters (numbers, special chars) keep as-is
-        processedCustom += char;
+        prefixChars[i] = char;
       }
     }
     
-    customPrefix = processedCustom;
-    
-    // Build character set for the remaining length from selected types
-    if (includeLowercase) chars += lowercase;
-    if (includeUppercase) chars += uppercase;
-    if (includeNumbers) chars += numbers;
-    if (includeSpecialChars) chars += specialChars;
-    
-    // Remove similar characters if requested
-    if (excludeSimilar) {
-      chars = chars
-        .split("")
-        .filter((char) => !similarChars.includes(char))
-        .join("");
-    }
-    
-    // Fallback to lowercase if no character types are selected
-    if (!chars) {
-      chars = lowercase;
-    }
-  } else {
-    // No custom characters - build character set normally
-    if (includeLowercase) chars += lowercase;
-    if (includeUppercase) chars += uppercase;
-    if (includeNumbers) chars += numbers;
-    if (includeSpecialChars) chars += specialChars;
-
-    // Remove similar characters if requested
-    if (excludeSimilar) {
-      chars = chars
-        .split("")
-        .filter((char) => !similarChars.includes(char))
-        .join("");
-    }
-
-    // Fallback to lowercase if no character types are selected
-    if (!chars) {
-      chars = lowercase;
-    }
+    customPrefix = prefixChars.join("");
   }
 
   const charsLength = chars.length;
   const remainingLength = Math.max(0, length - customPrefix.length);
-  const result = new Array(remainingLength);
 
-  // Generate random characters for the remaining length
+  // Check if we should guarantee strong password (all types enabled, no custom word)
+  const shouldGuaranteeStrong = !options?.customWorded && 
+    includeNumbers && 
+    includeSpecialChars && 
+    includeUppercase && 
+    includeLowercase &&
+    remainingLength >= 4;
+
+  // Pre-allocate result array for better memory efficiency
+  const result: string[] = new Array(remainingLength);
+  let finalPassword: string;
+
+  // Generate random characters - optimized for performance
   // Check if we're in Node.js environment
   if (typeof window === "undefined") {
     try {
       const { randomBytes } = await import("crypto");
-      const randomBytesArray = randomBytes(remainingLength * 4);
+      // Use Uint32 for better performance than reading at offsets
+      const byteCount = remainingLength * 4;
+      const randomBytesArray = randomBytes(byteCount);
+      const view = new Uint32Array(randomBytesArray.buffer, randomBytesArray.byteOffset, remainingLength);
 
       for (let i = 0; i < remainingLength; i++) {
-        const randomValue = randomBytesArray.readUInt32BE(i * 4);
-        result[i] = chars.charAt(randomValue % charsLength);
+        result[i] = chars[view[i] % charsLength];
       }
 
-      return customPrefix + result.join("");
+      finalPassword = customPrefix ? customPrefix + result.join("") : result.join("");
+
+      // Ensure strong password if all types are enabled
+      if (shouldGuaranteeStrong) {
+        finalPassword = ensureStrongPassword(finalPassword, customPrefix.length, {
+          lowercase,
+          uppercase,
+          numbers,
+          specialChars,
+          excludeSimilar
+        });
+      }
+
+      return finalPassword;
     } catch (error) {
       // Fall through to browser crypto or Math.random
     }
   }
 
-  // Browser environment or Node.js crypto failed
-  if (
-    typeof window !== "undefined" &&
-    window.crypto &&
-    window.crypto.getRandomValues
-  ) {
+  // Browser environment - use Web Crypto API (most efficient)
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
     const randomValues = new Uint32Array(remainingLength);
     window.crypto.getRandomValues(randomValues);
 
     for (let i = 0; i < remainingLength; i++) {
-      result[i] = chars.charAt(randomValues[i] % charsLength);
+      result[i] = chars[randomValues[i] % charsLength];
     }
   } else {
-    // Final fallback
+    // Final fallback - Math.random (least secure but works everywhere)
     for (let i = 0; i < remainingLength; i++) {
-      result[i] = chars.charAt(Math.floor(Math.random() * charsLength));
+      result[i] = chars[Math.floor(Math.random() * charsLength)];
     }
   }
 
-  return customPrefix + result.join("");
+  finalPassword = customPrefix ? customPrefix + result.join("") : result.join("");
+
+  // Ensure strong password if all types are enabled
+  if (shouldGuaranteeStrong) {
+    finalPassword = ensureStrongPassword(finalPassword, customPrefix.length, {
+      lowercase,
+      uppercase,
+      numbers,
+      specialChars,
+      excludeSimilar
+    });
+  }
+
+  return finalPassword;
 }
 
 // Clear the seed cache when the module is hot reloaded (for development)

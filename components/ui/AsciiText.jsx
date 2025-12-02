@@ -169,7 +169,6 @@ class AsciiFilter {
     }
 
     this.asciify(this.context, w, h);
-    this.updateHue();
   }
 
   onMouseMove(e) {
@@ -182,12 +181,6 @@ class AsciiFilter {
 
   get dy() {
     return this.mouse.y - this.center.y;
-  }
-
-  updateHue() {
-    const deg = (Math.atan2(this.dy, this.dx) * 180) / Math.PI;
-    this.deg += (deg - this.deg) * 0.075;
-    this.domElement.style.filter = `hue-rotate(${this.deg.toFixed(1)}deg)`;
   }
 
   asciify(ctx, w, h) {
@@ -313,7 +306,7 @@ class CanvAscii {
   setMesh() {
     this.textCanvas = new CanvasTxt(this.textString, {
       fontSize: this.textFontSize,
-      fontFamily: "IBM Plex Mono",
+      fontFamily: "Tomorrow",
       color: this.textColor,
     });
     this.textCanvas.resize();
@@ -349,7 +342,7 @@ class CanvAscii {
     this.renderer.setClearColor(0x000000, 0);
 
     this.filter = new AsciiFilter(this.renderer, {
-      fontFamily: "IBM Plex Mono",
+      fontFamily: "Tomorrow",
       fontSize: this.asciiFontSize,
       invert: true,
     });
@@ -540,46 +533,6 @@ export default function ASCIIText({
         zIndex: 1,
       }}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&display=swap');
-
-        body {
-          margin: 0;
-          padding: 0;
-        }
-
-        .ascii-text-container canvas {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          image-rendering: optimizeSpeed;
-          image-rendering: -moz-crisp-edges;
-          image-rendering: -o-crisp-edges;
-          image-rendering: -webkit-optimize-contrast;
-          image-rendering: optimize-contrast;
-          image-rendering: crisp-edges;
-          image-rendering: pixelated;
-        }
-
-        .ascii-text-container pre {
-          margin: 0;
-          user-select: none;
-          padding: 0;
-          line-height: 1em;
-          text-align: left;
-          position: absolute;
-          left: 0;
-          top: 0;
-          background-image: radial-gradient(circle, #ff6188 0%, #fc9867 50%, #ffd866 100%);
-          background-attachment: fixed;
-          -webkit-text-fill-color: transparent;
-          -webkit-background-clip: text;
-          z-index: 9;
-          mix-blend-mode: difference;
-        }
-      `}</style>
     </div>
   );
 }

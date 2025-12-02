@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 
-const Section = ({ id, title, children }) => {
+const Section = ({ id, title, children, className="" }) => {
   return (
     <motion.section
       id={id}
@@ -9,7 +9,7 @@ const Section = ({ id, title, children }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true, margin: "-100px" }}
-      className="py-10 scroll-mt-24"
+      className={`py-10 scroll-mt-24 ${className}`}
     >
       <h2 className="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-primary/20">
         <a href={`#${id}`} className="no-underline hover:underline before:details-content:' '">

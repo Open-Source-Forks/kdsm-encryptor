@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -32,7 +32,9 @@ import { motion } from "framer-motion";
 import FlowingMenu from "@/components/ui/FlowingMenu";
 import TextType from "@/components/ui/TextType";
 import Link from "next/link";
-import { WORD_LIST } from "@/utils/constants";
+import { getWordsByLength } from "@/utils/constants";
+import UpdatesAccordion from "@/components/UpdatesAccordion";
+
 
 const COPY_TIMEOUT = 2000;
 
@@ -56,11 +58,11 @@ export default function PasswordGenerator() {
 
   const handleOptionChange = useCallback((key, value) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  }, []); // Empty deps - function doesn't depend on external values
 
   const handleLengthChange = useCallback((value) => {
     setFormState((prev) => ({ ...prev, length: value }));
-  }, []);
+  }, []); // Empty deps - function doesn't depend on external values
 
   const generatePassword = useCallback(async () => {
     const {
@@ -75,7 +77,7 @@ export default function PasswordGenerator() {
       customWorded,
     } = formState;
 
-    // Validate at least one character type is selected
+    // Early validation checks
     if (
       !customWorded &&
       !useReadablePassword &&
@@ -91,7 +93,6 @@ export default function PasswordGenerator() {
       return;
     }
 
-    // Validate custom word is provided if useCustomWord is enabled
     if (useCustomWord && !customWorded) {
       toast.error("Custom Word Required", {
         description:
@@ -105,16 +106,46 @@ export default function PasswordGenerator() {
     try {
       let wordToUse = "";
 
-      // Determine which word to use
+      // Determine word prefix based on password length formula
       if (useReadablePassword) {
-        // Pick a random word from the word list
-        const randomIndex = Math.floor(Math.random() * WORD_LIST.length);
-        wordToUse = WORD_LIST[randomIndex];
+        // Formula: word_character_count = (password_length / 2) - 1
+        const targetWordLength = Math.floor(length[0] / 2) - 1;
+
+        // Clamp word length between 3 and 14
+        const clampedLength = Math.max(3, Math.min(14, targetWordLength));
+
+        // Get words of the calculated length
+        const wordsOfLength = getWordsByLength(clampedLength);
+
+        if (wordsOfLength && wordsOfLength.length > 0) {
+          // Select random word from the appropriate length category
+          wordToUse =
+            wordsOfLength[Math.floor(Math.random() * wordsOfLength.length)];
+        } else {
+          // Fallback to closest available length if exact length not available
+          let closestLength = clampedLength;
+          let minDiff = Infinity;
+
+          for (let len = 3; len <= 14; len++) {
+            const words = getWordsByLength(len);
+            if (words && words.length > 0) {
+              const diff = Math.abs(len - clampedLength);
+              if (diff < minDiff) {
+                minDiff = diff;
+                closestLength = len;
+              }
+            }
+          }
+
+          const fallbackWords = getWordsByLength(closestLength);
+          wordToUse =
+            fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+        }
       } else if (useCustomWord && customWorded) {
-        // Use the custom word
         wordToUse = customWorded;
       }
 
+      // Create options object with minimal overhead
       const options = {
         includeNumbers,
         includeSpecialChars,
@@ -125,6 +156,8 @@ export default function PasswordGenerator() {
       };
 
       const password = await generateKey(length[0], options);
+
+      // Batch state update
       setFormState((prev) => ({ ...prev, generatedPassword: password }));
 
       toast.success("Password Generated", {
@@ -134,19 +167,20 @@ export default function PasswordGenerator() {
       console.error("Password generation error:", error);
       toast.error("Generation Failed", {
         description:
-          error.message || "An error occurred while generating the password",
+          error?.message || "An error occurred while generating the password",
       });
     } finally {
       setIsGenerating(false);
     }
-  }, [formState]);
+  }, [formState]); // formState is the only dependency
 
   const copyToClipboard = useCallback((text) => {
+    let timeoutId;
     navigator.clipboard
       .writeText(text)
       .then(() => {
         setCopyState(true);
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           setCopyState(false);
         }, COPY_TIMEOUT);
         toast.success("Copied", {
@@ -158,7 +192,12 @@ export default function PasswordGenerator() {
           description: "Could not copy to clipboard",
         });
       });
-  }, []);
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []); // Empty deps - stable reference
 
   const handleClear = useCallback(() => {
     setFormState((prev) => ({
@@ -179,29 +218,51 @@ export default function PasswordGenerator() {
   }, []);
 
   const getPasswordStrength = useCallback((password) => {
-    if (!password)
+    if (!password) {
       return {
         strength: 0,
         label: "No password",
         color: "text-muted-foreground",
       };
+    }
 
+    // Optimized strength calculation with single pass - O(n)
     let score = 0;
-    if (password.length >= 8) score += 1;
-    if (password.length >= 12) score += 1;
-    if (/[a-z]/.test(password)) score += 1;
-    if (/[A-Z]/.test(password)) score += 1;
-    if (/[0-9]/.test(password)) score += 1;
-    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    const len = password.length;
+    let hasLower = false,
+      hasUpper = false,
+      hasNumber = false,
+      hasSpecial = false;
+
+    if (len >= 8) score += 1;
+    if (len >= 12) score += 1;
+
+    // Single pass through string instead of multiple regex tests
+    for (let i = 0; i < len; i++) {
+      const code = password.charCodeAt(i);
+      if (code >= 97 && code <= 122) hasLower = true;
+      else if (code >= 65 && code <= 90) hasUpper = true;
+      else if (code >= 48 && code <= 57) hasNumber = true;
+      else hasSpecial = true;
+    }
+
+    if (hasLower) score += 1;
+    if (hasUpper) score += 1;
+    if (hasNumber) score += 1;
+    if (hasSpecial) score += 1;
 
     if (score <= 2)
       return { strength: score, label: "Weak", color: "text-red-500" };
     if (score <= 4)
       return { strength: score, label: "Medium", color: "text-yellow-500" };
     return { strength: score, label: "Strong", color: "text-green-500" };
-  }, []);
+  }, []); // No dependencies - pure function
 
-  const passwordStrength = getPasswordStrength(formState.generatedPassword);
+  // Memoize password strength calculation to prevent unnecessary recalculations
+  const passwordStrength = useMemo(
+    () => getPasswordStrength(formState.generatedPassword),
+    [formState.generatedPassword, getPasswordStrength]
+  );
 
   return (
     <div className="w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-3xl relative z-20">
@@ -262,8 +323,8 @@ export default function PasswordGenerator() {
               <Slider
                 value={formState.length}
                 onValueChange={handleLengthChange}
-                max={128}
-                min={4}
+                max={30}
+                min={6}
                 step={1}
                 className="w-full"
               />
@@ -372,7 +433,7 @@ export default function PasswordGenerator() {
                     }}
                   />
                   <Label htmlFor="useCustomWord" className="text-xs sm:text-sm">
-                    Use custom word (3-6 characters)
+                    Use custom word (3-14 characters)
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -405,9 +466,9 @@ export default function PasswordGenerator() {
                 </Label>
                 <Input
                   id="customWorded"
-                  placeholder="Enter a custom word (3-6 characters)"
+                  placeholder="Enter a custom word (3-14 characters)"
                   minLength={3}
-                  maxLength={6}
+                  maxLength={14}
                   value={formState.customWorded}
                   onChange={(e) =>
                     handleOptionChange("customWorded", e.target.value)
@@ -506,6 +567,7 @@ export default function PasswordGenerator() {
               </div>
             )}
           </CardContent>
+          <UpdatesAccordion />
           <Link
             className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
             href={"/readme#free-password-generation-api"}
@@ -526,8 +588,10 @@ export default function PasswordGenerator() {
               cursorCharacter="|"
             />
           </Link>
-          <CardFooter className="flex-col">
+          <div>
             <FlowingMenu />
+          </div>
+          <CardFooter className="flex-col">
             <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-muted-foreground w-full gap-2 sm:gap-0 mt-8">
               <ShinyText
                 text="KDSM Password Generator by - Idris Vohra"

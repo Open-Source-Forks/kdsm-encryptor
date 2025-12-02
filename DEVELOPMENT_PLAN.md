@@ -257,8 +257,13 @@
 
 - [ ] Automatic room deletion after 7 days
 - [ ] UI for file upload/download
+- [ ] Subscription payment integration (Stripe/PayPal)
+- [ ] Automatic new password generation option and encrypted password sharing via email.
 - (　･ω･)☆ Backend & Data Improvements
   Soft Delete for Expired Messages:
+
+
+
 
 Instead of hard deleting messages, flag them as expired and hide in UI.
 
