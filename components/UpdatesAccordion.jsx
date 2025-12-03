@@ -25,9 +25,14 @@ export default function UpdatesAccordion() {
           <div className="bg-secondary/30 p-4 rounded-2xl font-tomorrow">
             <ul className="list-disc list-inside space-y-2 text-md sm:text-sm">
               <li>
-                CryptoPass Delivery - Granularly control your new auto-generated generated
-                password for your applications while receiving it securely via
-                encrypted email (Only you can crack it via your private key).
+                Shareable Encrypted Messages - Easily share encrypted messages
+                with auto-expiring links for enhanced security and privacy.
+              </li>
+              <li>
+                CryptoPass Delivery (Coming Soon!) - Granularly control your new
+                auto-generated generated password for your applications while
+                receiving it securely via encrypted email (Only you can crack it
+                via your private key).
               </li>
             </ul>
           </div>

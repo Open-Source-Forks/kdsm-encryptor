@@ -26,7 +26,7 @@ import {
   AlertCircle,
   Clock,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { getSharedMessage } from "@/lib/shareEncryptedMsgs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -47,7 +47,7 @@ export default function Page() {
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [copyState, setCopyState] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Refs for DOM elements
   const containerRef = useRef(null);
   const timerRef = useRef(null);
@@ -99,7 +99,7 @@ export default function Page() {
         // Message has expired
         clearInterval(timerRef.current);
         setTimeRemaining("Expired");
-        
+
         // Show error UI (server-side cron will handle deletion)
         setError("Message has expired");
         toast.error("Message Expired", {
@@ -346,6 +346,7 @@ export default function Page() {
                       handleDecrypt();
                     }
                   }}
+                  secured={true}
                 />
               </div>
 

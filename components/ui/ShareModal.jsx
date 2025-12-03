@@ -1,18 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Modal } from "@/components/ui/chats/Modal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  MessageCircle,
-  Send,
-  Instagram,
-  Copy,
-  Check,
-  Clock,
-  Lock,
-  LogIn,
-  Loader2,
-} from "lucide-react";
+import { Send, Copy, Check, Clock, Lock, LogIn, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { createSharedMessage } from "@/lib/shareEncryptedMsgs";
@@ -30,24 +20,67 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [expiryDuration, setExpiryDuration] = useState(300);
   const { user, loading } = useAuth();
+  const autoCloseTimerRef = useRef(null);
+
+  // Clear auto-close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Function to start auto-close timer
+  const startAutoCloseTimer = useCallback(() => {
+    // Clear any existing timer
+    if (autoCloseTimerRef.current) {
+      clearTimeout(autoCloseTimerRef.current);
+    }
+
+    // Set new timer for 10 seconds
+    autoCloseTimerRef.current = setTimeout(() => {
+      onClose();
+    }, 10000);
+  }, [onClose]);
+  // Check if user is premium
+  const isPremium = useMemo(() => {
+    return user?.labels?.includes("premium") || false;
+  }, [user]);
 
   // Define expiry duration options
   const expiryOptions = useMemo(
     () => [
       { label: "5 minutes", value: 300, enabled: true },
       { label: "10 minutes", value: 600, enabled: true },
-      { label: "30 minutes", value: 1800, enabled: false },
-      { label: "1 hour", value: 3600, enabled: false },
-      { label: "10 hours", value: 36000, enabled: false },
-      { label: "1 day", value: 86400, enabled: false },
+      {
+        label: "30 minutes",
+        value: 1800,
+        enabled: isPremium,
+      },
+      {
+        label: "1 hour",
+        value: 3600,
+        enabled: isPremium,
+      },
+      {
+        label: "10 hours",
+        value: 36000,
+        enabled: isPremium,
+      },
+      {
+        label: "1 day",
+        value: 86400,
+        enabled: isPremium,
+      },
     ],
-    []
+    [isPremium]
   );
 
   // Memoized share message without encryption key
   const shareMessage = useMemo(() => {
     if (!shareUrl) return "";
-    const baseMessage = `🔐 Try decrypting this message using KDSM Encryptor!\n\n✨ Click the link below to decrypt:\n${shareUrl}\n\n🚀 Secure. Simple. Powerful.\n\n#KDSMEncryptor #Encryption #Security`;
+    const baseMessage = `(^_^) Try decrypting this message using KDSM Encryptor!\n\n Click the link below to decrypt:\n${shareUrl}\n\n Secure. Simple. Powerful.\n\n#KDSMEncryptor #Encryption #Security`;
     return baseMessage;
   }, [shareUrl]);
 
@@ -56,14 +89,12 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
     () => [
       {
         name: "WhatsApp",
-        icon: MessageCircle,
         color: "bg-green-500 hover:bg-green-600",
         url: `https://wa.me/?text=${encodeURIComponent(shareMessage)}`,
         description: "Share via WhatsApp",
       },
       {
         name: "X (Twitter)",
-        icon: Send,
         color: "bg-black hover:bg-gray-800",
         url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
           shareMessage
@@ -72,18 +103,9 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       },
       {
         name: "Telegram",
-        icon: Send,
         color: "bg-blue-500 hover:bg-blue-600",
         url: `https://t.me/share/url?text=${encodeURIComponent(shareMessage)}`,
         description: "Share on Telegram",
-      },
-      {
-        name: "Instagram",
-        icon: Instagram,
-        color:
-          "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
-        url: null, // Instagram doesn't support direct URL sharing
-        description: "Copy for Instagram",
       },
     ],
     [shareMessage]
@@ -137,8 +159,9 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
           // Open social media platform
           window.open(platform.url, "_blank", "noopener,noreferrer");
           toast.success("Redirected", {
-            description: `Opened ${platform.name} to share your encrypted message`,
+            description: `Opened ${platform.name} to share your encrypted message. Modal will close in 10 seconds.`,
           });
+          startAutoCloseTimer();
         } else {
           // Copy to clipboard for platforms without direct URL support
           await navigator.clipboard.writeText(shareMessage);
@@ -149,8 +172,9 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
           }, 2000);
 
           toast.success("Copied", {
-            description: `Message copied for ${platform.name}. Paste it manually!`,
+            description: `Message copied for ${platform.name}. Paste it manually! Modal will close in 10 seconds.`,
           });
+          startAutoCloseTimer();
         }
       } catch (error) {
         console.error("Share error:", error);
@@ -180,8 +204,10 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       }, 2000);
 
       toast.success("Copied", {
-        description: "Share message copied to clipboard",
+        description:
+          "Share message copied to clipboard. Modal will close in 10 seconds.",
       });
+      startAutoCloseTimer();
     } catch (error) {
       console.error("Copy error:", error);
       toast.error("Copy Failed", {
@@ -197,8 +223,10 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("URL Copied", {
-        description: "Share link copied to clipboard",
+        description:
+          "Share link copied to clipboard. Modal will close in 10 seconds.",
       });
+      startAutoCloseTimer();
     } catch (error) {
       console.error("Copy URL error:", error);
       toast.error("Copy Failed", {
@@ -251,23 +279,25 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="flex flex-row items-center gap-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center"
+            className="w-12 h-12 shrink-0 bg-primary/10 rounded-full flex items-center justify-center"
           >
-            <Send className="w-8 h-8 text-primary" />
+            <Send className="w-6 h-6 text-primary" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-foreground">
-            Share Encrypted Message
-          </h2>
-          <p className="text-muted-foreground">
-            Generate a secure link to share your encrypted message
-          </p>
+          <div className="flex-1 text-left space-y-1 font-tomorrow">
+            <h2 className="text-xl font-bold text-foreground font-tomorrow">
+              Share Encrypted Message
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Generate a secure link to share your encrypted message
+            </p>
+          </div>
         </div>
 
         {/* Expiry Duration Selection */}
@@ -296,7 +326,7 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
                     value={option.value.toString()}
                     disabled={!option.enabled}
                   >
-                    {option.label} {!option.enabled && "(Coming Soon)"}
+                    {option.label} {!option.enabled && "(Premium Only)"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -387,7 +417,7 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="grid grid-cols-2 gap-3"
+              className="grid grid-cols-3 gap-2"
             >
               {platforms.map((platform, index) => (
                 <motion.div
@@ -402,7 +432,6 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
                     variant="ghost"
                   >
                     <div className="flex items-center gap-2">
-                      <platform.icon className="w-5 h-5" />
                       <span className="font-medium">{platform.name}</span>
                     </div>
 

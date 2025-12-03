@@ -1,36 +1,37 @@
 import LetterGlitch from "@/components/ui/LetterGlitch";
 
 export const metadata = {
-  title: "Password Generator",
+  title: "Encryption Tools - KDSM Encryptor",
   description:
-    "View and manage your KDSM Encryptor account settings and API keys",
+    "Access powerful encryption tools including message encryption/decryption and secure password generation with KDSM Encryptor",
   keywords: [
     "KDSM",
-    "profile",
-    "account",
     "encryption",
+    "decryption",
+    "password generator",
     "security",
     "message encryption",
     "cryptography",
+    "secure passwords",
+    "encryption tools",
     "javascript",
     "react",
     "nextjs",
     "messaging",
-    "messenger",
-    "register",
+    "privacy",
   ],
   openGraph: {
-    title: "Authenticate - KDSM Encryptor",
+    title: "Encryption Tools - KDSM Encryptor",
     description:
-      "Authenticate to your KDSM Encryptor account to access secure message encryption",
-    url: "https://kdsm.tech/auth/login",
+      "Secure your messages and generate strong passwords with KDSM Encryptor's powerful encryption tools",
+    url: "https://kdsm.tech/encryptor",
     siteName: "KDSM Encryptor",
     images: [
       {
         url: "https://kdsm.tech/icons/1.png",
         width: 1200,
         height: 630,
-        alt: "KDSM Encryptor Authenticate Page",
+        alt: "KDSM Encryptor Tools",
       },
     ],
     locale: "en_US",

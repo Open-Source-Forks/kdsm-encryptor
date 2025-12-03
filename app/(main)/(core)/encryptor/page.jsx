@@ -1,5 +1,5 @@
 "use client";
-// Todo sharable link with encrypted message
+// Todo develop an NPM package that uses KDSM to encryption, decryption of local files
 import { useRef, useState, useCallback, useMemo } from "react";
 import {
   Card,
@@ -34,6 +34,8 @@ import { AlertTriangle } from "lucide-react";
 import FlowingMenu from "@/components/ui/FlowingMenu";
 import Link from "next/link";
 import TextType from "@/components/ui/TextType";
+import KaomojiDropdown from "./../../../../components/ui/KaomojiDropdown";
+import UpdatesAccordion from "@/components/UpdatesAccordion";
 
 // Define constants with corrected emoji regex
 const KEY_START_MARKER = "[KDSM_KEY_START]";
@@ -348,7 +350,17 @@ export default function Home() {
                 </AlertTitle>
                 <AlertDescription className="text-xs sm:text-sm">
                   For security reasons, emojis will be automatically removed
-                  from your message during encryption
+                  from your message during encryption. If you want to include
+                  emotions try out{" "}
+                  <KaomojiDropdown
+                    text={"Our Kaomojis"}
+                    onSelectKaomoji={(kaomoji) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        message: prev.message + kaomoji,
+                      }))
+                    }
+                  />
                 </AlertDescription>
               </Alert>
             </div>
@@ -545,6 +557,7 @@ export default function Home() {
               </div>
             )}
           </CardContent>
+          <UpdatesAccordion />
           <Link
             className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
             href={"/docs#encryption-api"}

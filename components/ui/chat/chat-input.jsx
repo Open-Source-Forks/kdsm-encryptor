@@ -1,6 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { FilesIcon, Images, Plus, Send, Sticker } from "lucide-react";
+import { FilesIcon, Images, Plus, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { forwardRef, useRef, useState } from "react";
-import { KAOMOJIS } from "@/utils/constants";
+import KaomojiDropdown from "../KaomojiDropdown";
 
 const ChatInput = forwardRef(
   ({ className, onSend, onTyping, disabled, placeholder, ...props }, ref) => {
@@ -95,32 +95,7 @@ const ChatInput = forwardRef(
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size={"icon"} className="p-2">
-              <Sticker className="h-6 w-6" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[600px] max-h-96 overflow-y-auto"
-            align="start"
-          >
-            <div className="p-2">
-              <div className="grid grid-cols-6 gap-1">
-                {KAOMOJIS.map((kaomoji, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleKaomojiSelect(kaomoji)}
-                    className="p-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-center min-h-[2rem] flex items-center justify-center"
-                    title={kaomoji}
-                  >
-                    {kaomoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <KaomojiDropdown onSelectKaomoji={handleKaomojiSelect} />
 
         <Textarea
           autoComplete="off"

@@ -9,22 +9,22 @@ import React from "react";
 
 export default function page() {
   return (
-    <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white text-4xl font-bold min-w-screen h-full overflow-x-hidden">
+    <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white text-4xl font-bold w-full h-full overflow-x-hidden">
       <BubbleMenu logo="/icons/1.png" useFixedPosition={true} />
-      <section className="relative min-w-screen w-full h-screen" id="home">
+      <section className="relative w-full h-screen overflow-hidden" id="home">
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-primary/2 pointer-events-none">
           <Image
             src="/icons/4.png"
             alt="KDSM Encryptor"
-            width={150}
-            height={150}
+            width={240}
+            height={240}
             className="object-contain pointer-events-none"
           />
-          <div className="flex items-center justify-center text-3xl sm:text-4xl md:text-5xl font-extrabold gap-4 font-tomorrow">
+          <div className="flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-extrabold gap-4 font-tomorrow">
             <span>Super</span>
             <RotatingText
               texts={["Secure", "Fast", "Reliable", "Cool!"]}
-              mainClassName="px-2 sm:px-2 md:px-3 bg-red-300 overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+              mainClassName="px-2 sm:px-2 md:px-3 bg-secondary py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
               staggerFrom={"first"}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
@@ -56,7 +56,7 @@ export default function page() {
         </div>
         <HyperSpeed />
       </section>
-      <section className="min-w-screen w-full h-screen flex justify-center items-center" id="about">
+      <section className="w-full h-screen flex justify-center items-center overflow-hidden" id="about">
         <MagicBento
           textAutoHide={true}
           enableStars={false}
@@ -64,10 +64,10 @@ export default function page() {
           enableBorderGlow={true}
           enableTilt={false}
           enableMagnetism={false}
-          clickEffect={true}
+          clickEffect={false}
           spotlightRadius={300}
           particleCount={0}
-          glowColor="132, 0, 255"
+          glowColor="220, 38, 38"
         />
       </section>
     </div>
