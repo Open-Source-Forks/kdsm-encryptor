@@ -1,13 +1,12 @@
 import Silk from "@/components/ui/Silk";
 
 export const metadata = {
-  title: "README",
+  title: "Docs",
   description:
-    "Read the KDSM Encryptor README for an overview of the project, its features, and how to get started.",
+    "Read the KDSM Encryptor docs for an overview of the project, its features, and how to get started.",
   keywords: [
     "KDSM",
     "docs",
-    "readme",
     "documentation",
     "account",
     "encryption",
@@ -21,14 +20,14 @@ export const metadata = {
     "messenger",
   ],
   openGraph: {
-    title: "Authenticate - KDSM Encryptor",
+    title: "Docs - KDSM Encryptor",
     description:
-      "Authenticate to your KDSM Encryptor account to access secure message encryption",
-    url: "https://kdsm.vercel.app/auth/login",
+      "Read the KDSM Encryptor docs for an overview of the project, its features, and how to get started.",
+    url: "https://kdsm.tech/docs",
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.vercel.app/icons/1.png",
+        url: "https://kdsm.tech/icons/1.png",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor Authenticate Page",
@@ -40,7 +39,7 @@ export const metadata = {
 };
 export default function Layout({ children }) {
   return (
-    <div className="relative min-h-screen font-tomorrow">
+    <div className="relative min-h-screen font-tomorrow overflow-x-hidden">
       <Silk
         speed={5}
         scale={1}

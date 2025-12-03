@@ -25,11 +25,11 @@ export const metadata = {
     title: "Contribute - KDSM Encryptor",
     description:
       "Join the revolution! Contribute to KDSM Encryptor and help build the future of encryption with cutting-edge security and high performance.",
-    url: "https://kdsm.vercel.app/contribute",
+    url: "https://kdsm.tech/contribute",
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.vercel.app/icons/7.png",
+        url: "https://kdsm.tech/icons/7.png",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor Contribute Page",

@@ -10,7 +10,7 @@
 ---
 
 ![BSL License](https://img.shields.io/badge/license-BSL%201.1-blue)
-<a href="https://kdsm.vercel.app" target="_blank"><img src="./public/assets/kdsm-banner.gif" alt="KDSM banner, with logo and text saying 'Built for security'"></a>
+<a href="https://kdsm.tech" target="_blank"><img src="./public/assets/kdsm-banner.gif" alt="KDSM banner, with logo and text saying 'Built for security'"></a>
 <br />
 
 ## (ง •̀\_•́)ง Join the Revolution!

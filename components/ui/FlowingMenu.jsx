@@ -16,7 +16,7 @@ const ITEMS = [
   {
     title: "Developer API",
     imageNumber: "5",
-    link: "/readme#api-documentation",
+    link: "/docs#api-documentation",
   },
   {
     title: "Password Generator",

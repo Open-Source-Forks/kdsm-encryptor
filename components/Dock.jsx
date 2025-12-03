@@ -15,10 +15,10 @@ export function Dock() {
           className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
-      href: "/",
+      href: "/encryptor",
     },
     {
-      title: "README",
+      title: "DOCS",
       icon: (
         <Image
           src="/icons/4.png"
@@ -28,7 +28,7 @@ export function Dock() {
           className="drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300 pointer-events-none"
         />
       ),
-      href: "/readme",
+      href: "/docs",
     },
     {
       title: "Profile",

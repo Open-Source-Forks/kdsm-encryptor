@@ -74,8 +74,8 @@ export default function ReadmePage() {
 
   const CodeBlock = ({ children }) => (
     <div className="relative bg-secondary rounded-lg p-4">
-      <pre className="text-gray-100 text-sm overflow-x-auto overflow-y-hidden">
-        <code className="whitespace-pre-wrap break-words pointer-events-auto">
+      <pre className="text-gray-100 text-sm overflow-x-auto">
+        <code className="whitespace-pre-wrap break-words">
           {children}
         </code>
       </pre>
@@ -91,11 +91,11 @@ export default function ReadmePage() {
   );
 
   return (
-    <div className="w-full max-w-screen overflow-x-hidden overflow-y-auto">
+    <div className="overflow-x-hidden min-h-screen">
       <div className="relative z-10">
         <ASCIIText
-          text="KDSM"
-          // enableWaves={true}
+          text="K.D.S.M"
+          enableWaves={false}
           planeBaseHeight={planeBaseHeight}
           textColor={"#fdf9f3"}
         />
@@ -341,15 +341,15 @@ export default function ReadmePage() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm mb-2">Basic password generation:</p>
-                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&includeNumbers=true&includeSpecialChars=true"`}</CodeBlock>
+                  <CodeBlock>{`curl "https://kdsm.tech/api/password-generator?length=12&includeNumbers=true&includeSpecialChars=true"`}</CodeBlock>
                 </div>
                 <div>
                   <p className="text-sm mb-2">With readable password:</p>
-                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=12&useReadablePassword=true&includeNumbers=true&includeUppercase=true"`}</CodeBlock>
+                  <CodeBlock>{`curl "https://kdsm.tech/api/password-generator?length=12&useReadablePassword=true&includeNumbers=true&includeUppercase=true"`}</CodeBlock>
                 </div>
                 <div>
                   <p className="text-sm mb-2">With custom word:</p>
-                  <CodeBlock>{`curl "https://kdsm.vercel.app/api/password-generator?length=15&useCustomWord=true&customWord=secure&includeNumbers=true"`}</CodeBlock>
+                  <CodeBlock>{`curl "https://kdsm.tech/api/password-generator?length=15&useCustomWord=true&customWord=secure&includeNumbers=true"`}</CodeBlock>
                 </div>
               </div>
             </div>
@@ -402,13 +402,13 @@ export default function ReadmePage() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm mb-2">Basic password generation:</p>
-                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+                  <CodeBlock>{`curl -X POST https://kdsm.tech/api/password-generator \
   -H "Content-Type: application/json" \
   -d '{ "length": 12, "includeNumbers": true }'`}</CodeBlock>
                 </div>
                 <div>
                   <p className="text-sm mb-2">With readable password:</p>
-                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+                  <CodeBlock>{`curl -X POST https://kdsm.tech/api/password-generator \
   -H "Content-Type: application/json" \
   -d '{
     "length": 12,
@@ -419,7 +419,7 @@ export default function ReadmePage() {
                 </div>
                 <div>
                   <p className="text-sm mb-2">With custom word:</p>
-                  <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/password-generator \
+                  <CodeBlock>{`curl -X POST https://kdsm.tech/api/password-generator \
   -H "Content-Type: application/json" \
   -d '{
     "length": 15,
@@ -456,7 +456,7 @@ export default function ReadmePage() {
 
               <div>
                 <h3 className="text-xl font-semibold mb-4">Base URL</h3>
-                <CodeBlock>https://kdsm.vercel.app/api/v1</CodeBlock>
+                <CodeBlock>https://kdsm.tech/api/v1</CodeBlock>
               </div>
 
               <div>
@@ -531,7 +531,7 @@ export default function ReadmePage() {
 }`}</CodeBlock>
 
                     <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
-                    <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/v1/encrypt \\
+                    <CodeBlock>{`curl -X POST https://kdsm.tech/api/v1/encrypt \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: your_api_key_here" \\
   -d '{
@@ -559,7 +559,7 @@ export default function ReadmePage() {
 }`}</CodeBlock>
 
                     <h5 className="font-medium mb-2 mt-4">cURL Example:</h5>
-                    <CodeBlock>{`curl -X POST https://kdsm.vercel.app/api/v1/decrypt \\
+                    <CodeBlock>{`curl -X POST https://kdsm.tech/api/v1/decrypt \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: your_api_key_here" \\
   -d '{
@@ -608,7 +608,7 @@ export default function ReadmePage() {
                   API:
                 </p>
                 <CodeBlock>{`class KDSMClient {
-  constructor(apiKey, baseUrl = 'https://kdsm.vercel.app/api/v1') {
+  constructor(apiKey, baseUrl = 'https://kdsm.tech/api/v1') {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
   }
@@ -679,7 +679,7 @@ try {
 import json
 
 class KDSMClient:
-    def __init__(self, api_key, base_url="https://kdsm.vercel.app/api/v1"):
+    def __init__(self, api_key, base_url="https://kdsm.tech/api/v1"):
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {

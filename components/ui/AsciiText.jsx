@@ -93,6 +93,8 @@ class AsciiFilter {
     });
 
     this.pre = document.createElement("pre");
+    // Hide the pre element (orangish background ASCII)
+    this.pre.style.display = "none";
     this.domElement.appendChild(this.pre);
   }
 

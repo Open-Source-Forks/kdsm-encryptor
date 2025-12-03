@@ -24,11 +24,11 @@ export const metadata = {
     title: "Authenticate - KDSM Encryptor",
     description:
       "Authenticate to your KDSM Encryptor account to access secure message encryption",
-    url: "https://kdsm.vercel.app/auth/login",
+    url: "https://kdsm.tech/auth/login",
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.vercel.app/icons/1.png",
+        url: "https://kdsm.tech/icons/1.png",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor Authenticate Page",

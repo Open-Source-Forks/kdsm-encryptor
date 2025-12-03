@@ -570,7 +570,7 @@ export default function PasswordGenerator() {
           <UpdatesAccordion />
           <Link
             className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
-            href={"/readme#free-password-generation-api"}
+            href={"/docs#free-password-generation-api"}
             target="_blank"
           >
             <TextType

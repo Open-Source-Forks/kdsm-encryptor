@@ -605,7 +605,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push("/readme#api-documentation")}
+                onClick={() => router.push("/docs#api-documentation")}
                 className="text-blue-50 border-blue-300 hover:bg-blue-900"
               >
                 View Documentation

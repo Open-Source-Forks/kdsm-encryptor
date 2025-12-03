@@ -1,7 +1,6 @@
 import { Silkscreen, Tomorrow } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { Dock } from "@/components/Dock";
 import { AuthProvider } from "@/context/AuthContext";
 
 const silkscreen = Silkscreen({
@@ -43,11 +42,11 @@ export const metadata = {
     title: "KDSM Encryptor",
     description:
       "Secure your messages with Keyed Dynamic Shift Matrix encryption",
-    url: "https://kdsm.vercel.app",
+    url: "https://kdsm.tech",
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.vercel.app/icons/1.png",
+        url: "https://kdsm.tech/icons/1.png",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor OG Image",
@@ -66,7 +65,6 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <main>{children}</main>
-          <Dock />
           <Toaster />
         </AuthProvider>
       </body>
