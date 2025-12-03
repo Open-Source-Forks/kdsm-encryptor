@@ -1,18 +1,13 @@
 # CRON Job Setup for Shared Message Expiration
 
 ## Overview
-This project uses Vercel Cron Jobs to automatically cleanup expired shared encrypted messages every 5 minutes.
+This project uses **GitHub Actions** to automatically cleanup expired shared encrypted messages every 5 minutes. GitHub Actions is free for public repos and has no cron job limits (unlike Vercel's 2-job limit).
 
 ## Configuration
 
-### 1. Environment Variables
-Add this to your `.env.local` and Vercel environment variables:
+### 1. Generate Secrets
 
-```bash
-CRON_SECRET=your-secure-random-string-here
-```
-
-**Generate a secure secret:**
+**Generate a secure CRON_SECRET:**
 ```bash
 # Using Node.js
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -21,21 +16,26 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 openssl rand -hex 32
 ```
 
-### 2. Vercel Cron Configuration
-The cron job is configured in `vercel.json`:
+### 2. Add GitHub Secrets
+Go to your GitHub repository:
+1. Navigate to **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Add these secrets:
 
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-expired-messages",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
+| Secret Name | Description | Example |
+|------------|-------------|---------|
+| `CRON_SECRET` | Authentication token for cron endpoint | `abc123def456...` |
+| `APP_URL` | Your production URL (without trailing slash) | `https://kdsm.vercel.app` |
+
+### 3. GitHub Actions Workflow
+The workflow is configured in `.github/workflows/cleanup-expired-messages.yml`:
+
+```yaml
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:        # Manual trigger option
 ```
-
-**Schedule**: Runs every 5 minutes (`*/5 * * * *`)
 
 **Common cron patterns:**
 - `*/5 * * * *` - Every 5 minutes
@@ -43,19 +43,17 @@ The cron job is configured in `vercel.json`:
 - `0 * * * *` - Every hour
 - `0 0 * * *` - Daily at midnight
 
-### 3. Deployment
+### 4. Deployment
 1. Push your code to GitHub
-2. Deploy to Vercel
-3. Add `CRON_SECRET` to Vercel Environment Variables:
-   - Go to your project settings → Environment Variables
-   - Add `CRON_SECRET` with your generated value
-   - Redeploy for changes to take effect
+2. GitHub Actions will automatically start running
+3. Verify in the **Actions** tab of your repository
 
-### 4. Verify Cron is Working
-Check Vercel logs:
-1. Go to your Vercel project dashboard
-2. Navigate to "Logs" tab
-3. Look for cron execution logs every 5 minutes
+### 5. Verify Cron is Working
+Check GitHub Actions logs:
+1. Go to your GitHub repository
+2. Click **Actions** tab
+3. Look for "Cleanup Expired Messages" workflow runs
+4. Each run shows execution logs and results
 
 Expected output:
 ```json
@@ -82,8 +80,10 @@ Expected output:
    expiresAt = $createdAt + expire_seconds
    ```
 
-3. **Cron Job**: Every 5 minutes:
-   - Fetches all shared messages
+3. **GitHub Actions Cron**: Every 5 minutes:
+   - GitHub triggers the workflow
+   - Sends authenticated request to your API
+   - API fetches all shared messages
    - Checks if `current_time > expiresAt`
    - Deletes expired messages
 
@@ -93,6 +93,12 @@ Expected output:
    - Client-side countdown shows time remaining
 
 ## Manual Testing
+
+### Trigger from GitHub
+1. Go to **Actions** tab in your repository
+2. Select "Cleanup Expired Messages" workflow
+3. Click **Run workflow** → **Run workflow**
+4. Check the logs to see results
 
 ### Local Development
 You can manually trigger the cleanup:
@@ -111,44 +117,80 @@ curl -X POST https://kdsm.vercel.app/api/cron/cleanup-expired-messages \
 ## Security Notes
 
 1. **CRON_SECRET** protects the endpoint from unauthorized access
-2. Only Vercel's cron service should know this secret
+2. Stored securely in GitHub Secrets (encrypted)
 3. The API validates the Authorization header
 4. Never commit `CRON_SECRET` to version control
+5. GitHub Secrets are not accessible in pull requests from forks
 
 ## Monitoring
 
 Check these for cron job health:
-- **Vercel Logs**: Real-time execution logs
-- **Function Duration**: Should be < 10 seconds
-- **Error Rate**: Should be near 0%
+- **GitHub Actions Tab**: See all workflow runs with timestamps
+- **Workflow Logs**: Detailed execution logs for each run
+- **Email Notifications**: Get notified on workflow failures
 - **Appwrite Database**: Verify old messages are being deleted
 
 ## Troubleshooting
 
 ### Cron not running?
-1. Verify `vercel.json` is in project root
-2. Check Vercel deployment logs
-3. Ensure `CRON_SECRET` is set in Vercel
+1. Check **Actions** tab for workflow runs
+2. Verify secrets `CRON_SECRET` and `APP_URL` are set
+3. Make sure workflow file is in `.github/workflows/`
+4. Check if Actions are enabled: Settings → Actions → Allow all actions
 
 ### 401 Unauthorized?
-- `CRON_SECRET` mismatch between code and environment variables
-- Redeploy after updating environment variables
+- `CRON_SECRET` in GitHub Secrets doesn't match your `.env`
+- Check the secret name is exactly `CRON_SECRET` (case-sensitive)
+
+### Workflow fails?
+1. Check the workflow logs in Actions tab
+2. Verify `APP_URL` doesn't have trailing slash
+3. Ensure your app is deployed and accessible
 
 ### Messages not deleting?
 1. Check Appwrite API key permissions
-2. Verify collection ID is correct
-3. Check function logs for errors
+2. Verify collection ID is correct in environment variables
+3. Check API endpoint logs in Vercel
 
-## Cost Considerations
+## GitHub Actions Advantages
 
-- **Vercel Pro**: 100 cron executions/day included
-- **Vercel Hobby**: 1 cron job, 1 execution/day
-- Current setup: ~288 executions/day (every 5 min)
-- **Recommendation**: Adjust to `*/15 * * * *` for Hobby tier
+✅ **Completely free** for public repos
+✅ **2,000 free minutes/month** for private repos
+✅ **Unlimited cron jobs** (no 2-job Vercel limit)
+✅ **Runs independently** from your deployment
+✅ **Easy monitoring** via Actions tab
+✅ **Manual trigger** option via workflow_dispatch
+✅ **No build conflicts** with Vercel
 
-## Alternative Approaches
+## Cost & Limits
 
-If you need more frequent cleanup or have high volume:
-1. Use Vercel Edge Config for state management
-2. Implement database triggers (Appwrite Functions)
-3. Use external cron service (cron-job.org, EasyCron)
+**GitHub Actions (Free tier):**
+- Public repos: **Unlimited** minutes
+- Private repos: **2,000 minutes/month**
+- Current usage: ~2 seconds per run × 288 runs/day = **9.6 minutes/day**
+- **Monthly usage**: ~288 minutes (well within free tier)
+
+**Comparison:**
+| Service | Free Tier | Current Setup Cost |
+|---------|-----------|-------------------|
+| GitHub Actions | 2000 min/mo | ~288 min/mo ✅ FREE |
+| Vercel Hobby | 1 cron job | ❌ Not enough |
+| Vercel Pro | 100 runs/day | ❌ Exceeds limit |
+
+## Alternative Schedules
+
+Adjust the cron schedule in the workflow file if needed:
+
+```yaml
+# Every 1 minute (for testing)
+- cron: '* * * * *'
+
+# Every 10 minutes (reduce API calls)
+- cron: '*/10 * * * *'
+
+# Every 15 minutes (more conservative)
+- cron: '*/15 * * * *'
+
+# Every hour (minimal usage)
+- cron: '0 * * * *'
+```
