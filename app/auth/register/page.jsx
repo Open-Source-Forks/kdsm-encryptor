@@ -300,7 +300,7 @@ export default function RegisterPage() {
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <p className="text-sm">
+        <p className="text-sm text-center">
           Already have an account?{" "}
           <Link href="/auth/login" className="text-primary underline">
             Sign In

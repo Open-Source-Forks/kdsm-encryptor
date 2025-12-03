@@ -10,8 +10,59 @@ import React from "react";
 export default function page() {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white text-4xl font-bold w-full h-full overflow-x-hidden">
+      {/* SEO-optimized screen reader content */}
+      <h1 className="sr-only">
+        KDSM Encryptor - Military-Grade Message Encryption and Secure Password Generator
+      </h1>
+      <div className="sr-only">
+        <h2>What is KDSM Encryptor?</h2>
+        <p>
+          KDSM Encryptor is a free, open-source encryption platform that provides military-grade security 
+          for your messages and communications. Our KDSM encryption algorithm ensures your data remains 
+          private and secure with end-to-end encryption.
+        </p>
+        
+        <h2>Key Features of KDSM Encryptor</h2>
+        <ul>
+          <li>Military-grade KDSM encryption algorithm for maximum security</li>
+          <li>Secure password generator with cryptographic strength</li>
+          <li>Shareable encrypted message links with auto-expiration</li>
+          <li>Real-time end-to-end encrypted chat rooms</li>
+          <li>Zero-knowledge architecture - your data never stored in plain text</li>
+          <li>Open-source and transparent codebase for community trust</li>
+          <li>Free to use with premium options for extended features</li>
+        </ul>
+        
+        <h2>How to Encrypt Messages with KDSM</h2>
+        <p>
+          Encrypt your messages in three simple steps: Enter your message, generate or provide an encryption key, 
+          and click encrypt. Share the encrypted message and key separately for maximum security. Recipients can 
+          decrypt the message using the same key on our platform.
+        </p>
+        
+        <h2>Secure Password Generation</h2>
+        <p>
+          Generate strong, cryptographically secure passwords with customizable options including uppercase letters, 
+          lowercase letters, numbers, and special characters. Adjust password length from 8 to 128 characters for 
+          maximum security.
+        </p>
+        
+        <h2>Privacy and Security Commitment</h2>
+        <p>
+          At KDSM Encryptor, we prioritize your privacy. We implement zero-knowledge encryption, meaning we cannot 
+          access your encrypted messages or keys. All encryption happens client-side in your browser before any 
+          data transmission.
+        </p>
+        
+        <h2>Open Source Encryption Software</h2>
+        <p>
+          KDSM Encryptor is fully open source on GitHub, allowing developers and security researchers to audit 
+          our code. We believe in transparency and community-driven development for trustworthy encryption software.
+        </p>
+      </div>
+      
       <BubbleMenu logo="/icons/1.png" useFixedPosition={true} />
-      <section className="relative w-full h-screen overflow-hidden" id="home">
+      <section className="relative w-full h-screen overflow-hidden" id="home" aria-label="Hero section">
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-primary/2 pointer-events-none">
           <Image
             src="/icons/4.png"
@@ -56,7 +107,12 @@ export default function page() {
         </div>
         <HyperSpeed />
       </section>
-      <section className="w-full h-screen flex justify-center items-center overflow-hidden" id="about">
+      
+      <section className="w-full flex justify-center items-center overflow-hidden relative pt-20" id="about" aria-label="Features section">
+        <h2 className="sr-only">KDSM Encryptor Features and Capabilities</h2>
+        {/* Centered Gold Gradient Blur */}
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] rounded-full bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 opacity-40 blur-[100px] pointer-events-none z-0" />
+        
         <MagicBento
           textAutoHide={true}
           enableStars={false}

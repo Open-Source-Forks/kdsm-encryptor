@@ -77,7 +77,6 @@ export default function ProfilePage() {
     }
 
     if (user) {
-      console.log(user);
       fetchApiKeys();
       fetchRateLimitStatus();
     }
@@ -251,8 +250,8 @@ export default function ProfilePage() {
       <CardHeader>
         <div className="flex items-center space-x-4">
           <InitialsAvatar user={user} />
-          <div>
-            <CardTitle className="flex items-center gap-2">
+          <div className="w-[90%] overflow-hidden truncate ">
+            <CardTitle className="flex items-center gap-2 flex-wrap font-tomorrow">
               {user?.name || "User"}
               {rateLimitStatus && (
                 <Badge
@@ -261,13 +260,15 @@ export default function ProfilePage() {
                   )} flex items-center gap-1 capitalize font-tomorrow`}
                 >
                   {getTierIcon(rateLimitStatus.tier)}
-                  {rateLimitStatus.tier}
+                  <span className="hidden sm:block">
+                    {rateLimitStatus.tier}
+                  </span>
                 </Badge>
               )}
               {user.emailVerification && (
                 <Badge variant="success">
                   <CheckCircle className="w-4 h-4" />
-                  Verified
+                  <span className="hidden sm:block">Verified</span>
                 </Badge>
               )}
             </CardTitle>
@@ -438,11 +439,10 @@ export default function ProfilePage() {
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
-                    size="sm"
                     disabled={apiKeys.length >= 3}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    New Key ({apiKeys.length}/3)
+                    ({apiKeys.length}/3)
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -504,8 +504,8 @@ export default function ProfilePage() {
                 ) : (
                   apiKeys.map((key) => (
                     <Card key={key.$id} className="bg-background/50">
-                      <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
+                      <CardContent className="py-2">
+                        <div className="flex items-center justify-between flex-wrap">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h4 className="font-medium">{key.keyName}</h4>
@@ -527,12 +527,12 @@ export default function ProfilePage() {
                               </p>
                             </div>
 
-                            <div className="mt-3 p-2 bg-muted rounded border">
-                              <div className="flex items-center gap-2">
+                            <div className="mt-3 p-2 bg-muted rounded border w-full overflow-x-hidden truncate">
+                              <div className="flex items-center gap-2 flex-wrap w-full">
                                 <code className="text-xs flex-1 font-mono">
                                   {visibleKeys.has(key.$id)
                                     ? key.apiKey
-                                    : "••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••"}
+                                    : "•••••••••••••••••••••••••••••••••••••"}
                                 </code>
                                 <Button
                                   variant="ghost"
@@ -559,7 +559,7 @@ export default function ProfilePage() {
                           <div className="ml-4">
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button size="icon">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </Button>
                               </AlertDialogTrigger>

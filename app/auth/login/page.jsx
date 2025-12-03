@@ -87,7 +87,7 @@ export default function LoginPage() {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center flex-col items-center space-y-2">
+      <CardFooter className="flex justify-center flex-col items-center space-y-2 text-center">
         {failed && (
           <p className="text-sm">
             Forgot password?{" "}
