@@ -46,7 +46,7 @@ export async function POST(request) {
       );
     }
 
-    const { encryptedMessage, encryptionKey, expireSeconds } =
+    const { encryptedMessage, encryptionKey, expireSeconds, hangman, tries } =
       await request.json();
 
     // Validate inputs
@@ -72,6 +72,19 @@ export async function POST(request) {
       );
     }
 
+    // Validate hangman and tries
+    const enableHangman = Boolean(hangman);
+    const hangmanTries = parseInt(tries) || -1;
+    
+    if (enableHangman && hangmanTries !== -1) {
+      if (hangmanTries < 6 || hangmanTries > 10) {
+        return NextResponse.json(
+          { success: false, error: "Tries must be -1 (infinite) or between 6 and 10" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Generate unique slug
     const slug = generateMessageSlug();
 
@@ -94,6 +107,8 @@ export async function POST(request) {
         actual_key: encryptionKey,
         expire_seconds: expiry,
         userId: user.$id,
+        hangman: enableHangman,
+        tries: hangmanTries,
       }
     );
 

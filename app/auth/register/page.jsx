@@ -24,6 +24,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -50,6 +51,7 @@ export default function RegisterPage() {
         includeUppercase: true,
         includeLowercase: true,
         excludeSimilar: true, // Exclude similar looking characters for better usability
+        useReadablePassword: true, // Generate a readable password
       });
 
       setPassword(strongPassword);
@@ -175,7 +177,7 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Your Name"
               required
-              maxLength={50}
+              maxLength={25}
               autoFocus
             />
           </div>

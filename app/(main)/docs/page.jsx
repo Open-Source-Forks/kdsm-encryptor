@@ -311,9 +311,45 @@ export default function ReadmePage() {
               <CodeBlock>{`length=12&includeNumbers=true&includeSpecialChars=true&includeUppercase=true&includeLowercase=true&excludeSimilar=false&useCustomWord=false&customWord=&useReadablePassword=false`}</CodeBlock>
               <div className="my-4 space-y-2 text-sm">
                 <p>
-                  <strong>New Parameters:</strong>
+                  <strong>All Parameters:</strong>
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      length
+                    </code>{" "}
+                    - Password length (6-30 characters)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeNumbers
+                    </code>{" "}
+                    - Include numbers 0-9 (true/false)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeSpecialChars
+                    </code>{" "}
+                    - Include special characters (true/false)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeUppercase
+                    </code>{" "}
+                    - Include uppercase letters (true/false)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeLowercase
+                    </code>{" "}
+                    - Include lowercase letters (true/false)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      excludeSimilar
+                    </code>{" "}
+                    - Exclude similar characters like 0, O, l, 1, I (true/false)
+                  </li>
                   <li>
                     <code className="bg-secondary px-2 py-1 rounded">
                       useCustomWord
@@ -331,9 +367,17 @@ export default function ReadmePage() {
                     <code className="bg-secondary px-2 py-1 rounded">
                       useReadablePassword
                     </code>{" "}
-                    - Enable random readable word (true/false)
+                    - Generate with random readable word prefix (true/false, mutually exclusive with useCustomWord)
                   </li>
                 </ul>
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded">
+                  <p className="text-xs">
+                    <strong>Note:</strong> When <code className="bg-secondary px-1 rounded">useReadablePassword=true</code>, 
+                    the API automatically selects an appropriate word based on password length using the formula: 
+                    word_length = (password_length / 2) - 1. This creates memorable passwords with a readable word prefix 
+                    followed by random characters.
+                  </p>
+                </div>
               </div>
               <h5 className="font-medium mb-2 mt-4">Response:</h5>
               <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>
@@ -373,28 +417,73 @@ export default function ReadmePage() {
 }`}</CodeBlock>
               <div className="my-4 space-y-2 text-sm">
                 <p>
-                  <strong>New Fields:</strong>
+                  <strong>Request Body Fields:</strong>
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>
                     <code className="bg-secondary px-2 py-1 rounded">
+                      length
+                    </code>{" "}
+                    - Password length (number, 6-30)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeNumbers
+                    </code>{" "}
+                    - Include numbers (boolean)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeSpecialChars
+                    </code>{" "}
+                    - Include special characters (boolean)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeUppercase
+                    </code>{" "}
+                    - Include uppercase letters (boolean)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      includeLowercase
+                    </code>{" "}
+                    - Include lowercase letters (boolean)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
+                      excludeSimilar
+                    </code>{" "}
+                    - Exclude similar-looking characters (boolean)
+                  </li>
+                  <li>
+                    <code className="bg-secondary px-2 py-1 rounded">
                       useCustomWord
                     </code>{" "}
-                    - Enable custom word prefix
+                    - Enable custom word prefix (boolean)
                   </li>
                   <li>
                     <code className="bg-secondary px-2 py-1 rounded">
                       customWord
                     </code>{" "}
-                    - Your custom word (3-14 characters)
+                    - Your custom word, 3-14 characters (string)
                   </li>
                   <li>
                     <code className="bg-secondary px-2 py-1 rounded">
                       useReadablePassword
                     </code>{" "}
-                    - Generate with random readable word
+                    - Generate with random readable word prefix (boolean)
                   </li>
                 </ul>
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded">
+                  <p className="text-xs">
+                    <strong>Important:</strong> <code className="bg-secondary px-1 rounded">useReadablePassword</code> and{" "}
+                    <code className="bg-secondary px-1 rounded">useCustomWord</code> are mutually exclusive. 
+                    When <code className="bg-secondary px-1 rounded">useReadablePassword=true</code>, 
+                    the system automatically selects a word from a curated list based on the password length, 
+                    creating memorable yet secure passwords.
+                  </p>
+                </div>
               </div>
               <h5 className="font-medium mb-2 mt-4">Response:</h5>
               <CodeBlock>{`{ "password": "generated_password_here" }`}</CodeBlock>

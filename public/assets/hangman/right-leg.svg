@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Right Leg Upper -->
+  <rect x="105" y="190" width="25" height="60" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Knee joint -->
+  <circle cx="117.5" cy="250" r="7" fill="#3a3e4a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Lower leg -->
+  <rect x="108" y="255" width="19" height="50" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Foot -->
+  <rect x="100" y="305" width="30" height="12" rx="3" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+</svg>

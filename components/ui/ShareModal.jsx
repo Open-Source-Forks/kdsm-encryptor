@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Modal } from "@/components/ui/chats/Modal";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Send, Copy, Check, Clock, Lock, LogIn, Loader2 } from "lucide-react";
+import { Send, Copy, Check, Clock, Lock, LogIn, Loader2, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { createSharedMessage } from "@/lib/shareEncryptedMsgs";
@@ -13,12 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SocialIcon } from "react-social-icons";
+import { Checkbox } from "./checkbox";
 
 const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
   const [copiedPlatform, setCopiedPlatform] = useState(null);
   const [shareUrl, setShareUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [expiryDuration, setExpiryDuration] = useState(300);
+  const [formData, setFormData] = useState({
+    duration: 300,
+    hangman: false,
+    tries: -1,
+  });
   const { user, loading } = useAuth();
   const autoCloseTimerRef = useRef(null);
 
@@ -43,6 +50,11 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       onClose();
     }, 10000);
   }, [onClose]);
+  // Handle form data changes
+  const updateFormData = useCallback((key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
   // Check if user is premium
   const isPremium = useMemo(() => {
     return user?.labels?.includes("premium") || false;
@@ -90,12 +102,14 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       {
         name: "WhatsApp",
         color: "bg-green-500 hover:bg-green-600",
+        Icon: <SocialIcon network="whatsapp" className="size-12" />,
         url: `https://wa.me/?text=${encodeURIComponent(shareMessage)}`,
         description: "Share via WhatsApp",
       },
       {
         name: "X (Twitter)",
         color: "bg-black hover:bg-gray-800",
+        Icon: <SocialIcon network="twitter" className="size-12" />,
         url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
           shareMessage
         )}`,
@@ -104,6 +118,7 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       {
         name: "Telegram",
         color: "bg-blue-500 hover:bg-blue-600",
+        Icon: <SocialIcon network="telegram" className="size-12" />,
         url: `https://t.me/share/url?text=${encodeURIComponent(shareMessage)}`,
         description: "Share on Telegram",
       },
@@ -120,19 +135,31 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
       return;
     }
 
+    // Validate tries if hangman is enabled
+    if (formData.hangman && formData.tries !== -1) {
+      if (formData.tries < 6 || formData.tries > 10) {
+        toast.error("Invalid Tries", {
+          description: "Tries must be between 6 and 10, or -1 for infinite",
+        });
+        return;
+      }
+    }
+
     setIsGenerating(true);
     try {
       const result = await createSharedMessage(
         encryptedMessage,
         encryptionKey,
-        expiryDuration
+        formData.duration,
+        formData.hangman,
+        formData.tries
       );
 
       setShareUrl(result.shareUrl);
       toast.success("Link Generated", {
         description: `Your link will expire in ${
-          expiryOptions.find((opt) => opt.value === expiryDuration)?.label
-        }`,
+          expiryOptions.find((opt) => opt.value === formData.duration)?.label
+        }${formData.hangman ? " with Hangman mode enabled" : ""}`,
       });
     } catch (error) {
       console.error("Generate link error:", error);
@@ -142,7 +169,7 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
     } finally {
       setIsGenerating(false);
     }
-  }, [user, encryptedMessage, encryptionKey, expiryDuration, expiryOptions]);
+  }, [user, encryptedMessage, encryptionKey, formData, expiryOptions]);
 
   // Handle platform share with optimized copy functionality
   const handleShare = useCallback(
@@ -300,40 +327,103 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
           </div>
         </div>
 
-        {/* Expiry Duration Selection */}
+        {/* Form Settings */}
         {!shareUrl && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-3"
+            className="space-y-4"
           >
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Link Expiry Duration
-            </label>
-            <Select
-              value={expiryDuration.toString()}
-              onValueChange={(value) => setExpiryDuration(parseInt(value))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select expiry duration" />
-              </SelectTrigger>
-              <SelectContent>
-                {expiryOptions.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value.toString()}
-                    disabled={!option.enabled}
-                  >
-                    {option.label} {!option.enabled && "(Premium Only)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              The link will automatically expire after the selected duration
-            </p>
+            {/* Expiry Duration */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Link Expiry Duration
+              </Label>
+              <Select
+                value={formData.duration.toString()}
+                onValueChange={(value) => updateFormData("duration", parseInt(value))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select expiry duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {expiryOptions.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value.toString()}
+                      disabled={!option.enabled}
+                    >
+                      {option.label} {!option.enabled && "(Premium Only)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                The link will automatically expire after the selected duration
+              </p>
+            </div>
+
+            {/* Hangman Mode */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="hangman"
+                  checked={formData.hangman}
+                  onCheckedChange={(checked) => {
+                    updateFormData("hangman", checked);
+                    // Reset tries to default when disabling hangman
+                    if (!checked) {
+                      updateFormData("tries", -1);
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor="hangman"
+                  className="text-sm font-medium flex items-center gap-2 cursor-pointer"
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  Enable Hangman Mode
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Recipients will play a hangman game to reveal the decryption key
+              </p>
+            </div>
+
+            {/* Tries (only shown when hangman is enabled) */}
+            {formData.hangman && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2"
+              >
+                <Label htmlFor="tries" className="text-sm font-medium">
+                  Number of Tries
+                </Label>
+                <Select
+                  value={formData.tries.toString()}
+                  onValueChange={(value) => updateFormData("tries", parseInt(value))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select number of tries" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="-1">Infinite</SelectItem>
+                    <SelectItem value="6">6 tries</SelectItem>
+                    <SelectItem value="7">7 tries</SelectItem>
+                    <SelectItem value="8">8 tries</SelectItem>
+                    <SelectItem value="9">9 tries</SelectItem>
+                    <SelectItem value="10">10 tries</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Set to infinite for unlimited attempts, or 6-10 for limited tries
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -417,7 +507,7 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="grid grid-cols-3 gap-2"
+              className="flex flex-wrap justify-evenly items-center gap-2"
             >
               {platforms.map((platform, index) => (
                 <motion.div
@@ -428,11 +518,14 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
                 >
                   <Button
                     onClick={() => handleShare(platform)}
-                    className={`w-full h-12 ${platform.color} text-white relative overflow-hidden group`}
+                    className={`size-14 text-white relative overflow-hidden group`}
                     variant="ghost"
+                    size="icon"
+                    aria-label={platform.description}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{platform.name}</span>
+                      <span className="sr-only">{platform.name}</span>
+                      {platform.Icon}
                     </div>
 
                     {/* Success indicator */}

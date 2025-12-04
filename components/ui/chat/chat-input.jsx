@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { forwardRef, useRef, useState } from "react";
-import KaomojiDropdown from "../KaomojiDropdown";
+import KaomojiDrawer from "../KaomojiDrawer";
 
 const ChatInput = forwardRef(
   ({ className, onSend, onTyping, disabled, placeholder, ...props }, ref) => {
@@ -95,7 +95,7 @@ const ChatInput = forwardRef(
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <KaomojiDropdown onSelectKaomoji={handleKaomojiSelect} />
+        <KaomojiDrawer onSelectKaomoji={handleKaomojiSelect} />
 
         <Textarea
           autoComplete="off"

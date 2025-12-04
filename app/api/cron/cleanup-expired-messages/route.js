@@ -4,18 +4,28 @@ import { config, collections } from "@/lib/appwrite/kdsm";
 
 /**
  * CRON job to cleanup expired shared messages
- * This endpoint should be called periodically by Vercel Cron
+ * This endpoint should be called periodically by GitHub Actions
  */
 export async function GET(request) {
+  console.log("[CRON] Cleanup job started at:", new Date().toISOString());
+  
   try {
-    // Verify the request is from Vercel Cron (optional but recommended)
+    // Verify the request is from GitHub Actions (optional but recommended)
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+    
+    console.log("[CRON] Auth header present:", !!authHeader);
+    console.log("[CRON] CRON_SECRET configured:", !!process.env.CRON_SECRET);
+    
+    if (authHeader !== expectedAuth) {
+      console.error("[CRON] Unauthorized access attempt");
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
+    
+    console.log("[CRON] Authorization successful");
 
     // Create client with API key for server-side operations
     const client = new Client()
@@ -26,11 +36,14 @@ export async function GET(request) {
     const databases = new Databases(client);
 
     // Fetch all shared messages
+    console.log("[CRON] Fetching shared messages...");
     const response = await databases.listDocuments(
       config.database,
       collections.share_encrypted_messages,
       [Query.orderAsc("$createdAt"), Query.limit(100)] // Process in batches
     );
+
+    console.log(`[CRON] Found ${response.documents.length} messages to check`);
 
     let deletedCount = 0;
     let checkedCount = 0;
@@ -47,6 +60,7 @@ export async function GET(request) {
 
       // If expired, delete it
       if (now > expiresAt) {
+        console.log(`[CRON] Deleting expired message: ${doc.message_slug} (expired: ${expiresAt.toISOString()})`);
         try {
           await databases.deleteDocument(
             config.database,
@@ -54,13 +68,15 @@ export async function GET(request) {
             doc.$id
           );
           deletedCount++;
-          console.log(`Deleted expired message: ${doc.message_slug}`);
+          console.log(`[CRON] ✓ Deleted message: ${doc.message_slug}`);
         } catch (deleteError) {
           console.error(
-            `Failed to delete message ${doc.message_slug}:`,
+            `[CRON] ✗ Failed to delete message ${doc.message_slug}:`,
             deleteError
           );
         }
+      } else {
+        console.log(`[CRON] Message ${doc.message_slug} not expired yet (expires: ${expiresAt.toISOString()})`);
       }
     }
 
@@ -75,15 +91,24 @@ export async function GET(request) {
       },
     };
 
-    console.log("Cleanup results:", result);
+    console.log("[CRON] Cleanup completed:", result);
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Cleanup cron job error:", error);
+    console.error("[CRON] Cleanup cron job error:", error);
+    console.error("[CRON] Error details:", {
+      message: error.message,
+      code: error.code,
+      type: error.type,
+    });
     return NextResponse.json(
       {
         success: false,
         error: error.message || "Failed to cleanup expired messages",
+        details: {
+          code: error.code,
+          type: error.type,
+        }
       },
       { status: 500 }
     );

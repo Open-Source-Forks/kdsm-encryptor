@@ -350,6 +350,8 @@ export async function generateKey(
     includeLowercase?: boolean;
     excludeSimilar?: boolean; // Exclude similar looking characters like 0, O, l, 1, I
     customWorded?: string; // Custom character set to use instead
+    useReadablePassword?: boolean; // Generate readable password with random word prefix
+    getWordsByLength?: (length: number) => string[] | undefined; // Function to get words by length
   }
 ): Promise<string> {
   // Default character sets
@@ -368,6 +370,8 @@ export async function generateKey(
   const includeUppercase = options?.includeUppercase ?? true;
   const includeLowercase = options?.includeLowercase ?? true;
   const excludeSimilar = options?.excludeSimilar ?? false;
+  const useReadablePassword = options?.useReadablePassword ?? false;
+  const getWordsByLength = options?.getWordsByLength;
 
   // Build character set efficiently - O(1) since sets are constant size
   const charParts: string[] = [];
@@ -392,13 +396,77 @@ export async function generateKey(
   // Fallback to lowercase if no character types are selected
   if (!chars) chars = lowercase;
 
+  // Handle readable password generation with random word prefix
+  if (useReadablePassword && getWordsByLength) {
+    // Formula: word_character_count = (password_length / 2) - 1
+    const targetWordLength = Math.floor(length / 2) - 1;
+
+    // Clamp word length between 3 and 14
+    const clampedLength = Math.max(3, Math.min(14, targetWordLength));
+
+    // Get words of the calculated length
+    const wordsOfLength = getWordsByLength(clampedLength);
+
+    if (wordsOfLength && wordsOfLength.length > 0) {
+      // Select random word from the appropriate length category
+      customPrefix = wordsOfLength[Math.floor(Math.random() * wordsOfLength.length)];
+    } else {
+      // Fallback to closest available length if exact length not available
+      let closestLength = clampedLength;
+      let minDiff = Infinity;
+
+      for (let len = 3; len <= 14; len++) {
+        const words = getWordsByLength(len);
+        if (words && words.length > 0) {
+          const diff = Math.abs(len - clampedLength);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestLength = len;
+          }
+        }
+      }
+
+      const fallbackWords = getWordsByLength(closestLength);
+      if (fallbackWords && fallbackWords.length > 0) {
+        customPrefix = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+      }
+    }
+  }
   // Process custom word prefix with optimized character checking - O(m) where m is word length
-  if (options?.customWorded) {
+  else if (options?.customWorded) {
     const customWorded = options.customWorded;
     const prefixChars: string[] = new Array(customWorded.length);
     
     for (let i = 0; i < customWorded.length; i++) {
       const char = customWorded[i];
+      const code = char.charCodeAt(0);
+      const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+      
+      if (isLetter) {
+        if (includeUppercase && includeLowercase) {
+          // Random mixed casing
+          prefixChars[i] = Math.random() < 0.5 ? char.toUpperCase() : char.toLowerCase();
+        } else if (includeUppercase && !includeLowercase) {
+          prefixChars[i] = char.toUpperCase();
+        } else if (includeLowercase && !includeUppercase) {
+          prefixChars[i] = char.toLowerCase();
+        } else {
+          prefixChars[i] = char;
+        }
+      } else {
+        prefixChars[i] = char;
+      }
+    }
+    
+    customPrefix = prefixChars.join("");
+  }
+
+  // Apply casing to readable password prefix
+  if (useReadablePassword && customPrefix) {
+    const prefixChars: string[] = new Array(customPrefix.length);
+    
+    for (let i = 0; i < customPrefix.length; i++) {
+      const char = customPrefix[i];
       const code = char.charCodeAt(0);
       const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
       

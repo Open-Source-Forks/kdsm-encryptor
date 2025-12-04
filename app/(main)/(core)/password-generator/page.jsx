@@ -34,7 +34,7 @@ import TextType from "@/components/ui/TextType";
 import Link from "next/link";
 import { getWordsByLength } from "@/utils/constants";
 import UpdatesAccordion from "@/components/UpdatesAccordion";
-
+// Todo: Secure vault for storing generated passwords with encryption and the ability to export/import securely with the key being the answer to a security question. 
 
 const COPY_TIMEOUT = 2000;
 
@@ -104,47 +104,6 @@ export default function PasswordGenerator() {
     setIsGenerating(true);
 
     try {
-      let wordToUse = "";
-
-      // Determine word prefix based on password length formula
-      if (useReadablePassword) {
-        // Formula: word_character_count = (password_length / 2) - 1
-        const targetWordLength = Math.floor(length[0] / 2) - 1;
-
-        // Clamp word length between 3 and 14
-        const clampedLength = Math.max(3, Math.min(14, targetWordLength));
-
-        // Get words of the calculated length
-        const wordsOfLength = getWordsByLength(clampedLength);
-
-        if (wordsOfLength && wordsOfLength.length > 0) {
-          // Select random word from the appropriate length category
-          wordToUse =
-            wordsOfLength[Math.floor(Math.random() * wordsOfLength.length)];
-        } else {
-          // Fallback to closest available length if exact length not available
-          let closestLength = clampedLength;
-          let minDiff = Infinity;
-
-          for (let len = 3; len <= 14; len++) {
-            const words = getWordsByLength(len);
-            if (words && words.length > 0) {
-              const diff = Math.abs(len - clampedLength);
-              if (diff < minDiff) {
-                minDiff = diff;
-                closestLength = len;
-              }
-            }
-          }
-
-          const fallbackWords = getWordsByLength(closestLength);
-          wordToUse =
-            fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
-        }
-      } else if (useCustomWord && customWorded) {
-        wordToUse = customWorded;
-      }
-
       // Create options object with minimal overhead
       const options = {
         includeNumbers,
@@ -152,7 +111,9 @@ export default function PasswordGenerator() {
         includeUppercase,
         includeLowercase,
         excludeSimilar,
-        customWorded: wordToUse || undefined,
+        customWorded: useCustomWord && customWorded ? customWorded : undefined,
+        useReadablePassword,
+        getWordsByLength: useReadablePassword ? getWordsByLength : undefined,
       };
 
       const password = await generateKey(length[0], options);

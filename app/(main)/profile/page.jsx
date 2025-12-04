@@ -77,6 +77,7 @@ export default function ProfilePage() {
     }
 
     if (user) {
+      console.log(user)
       fetchApiKeys();
       fetchRateLimitStatus();
     }
@@ -256,16 +257,16 @@ export default function ProfilePage() {
               {rateLimitStatus && (
                 <Badge
                   className={`${getTierColor(
-                    rateLimitStatus.tier
+                    rateLimitStatus?.tier
                   )} flex items-center gap-1 capitalize font-tomorrow`}
                 >
-                  {getTierIcon(rateLimitStatus.tier)}
+                  {getTierIcon(rateLimitStatus?.tier)}
                   <span className="hidden sm:block">
-                    {rateLimitStatus.tier}
+                    {rateLimitStatus?.tier}
                   </span>
                 </Badge>
               )}
-              {user.emailVerification && (
+              {user?.emailVerification && (
                 <Badge variant="success">
                   <CheckCircle className="w-4 h-4" />
                   <span className="hidden sm:block">Verified</span>
@@ -299,12 +300,12 @@ export default function ProfilePage() {
                 Account Details
               </h3>
               <p className="text-sm text-muted-foreground">
-                Subscription: {user?.subscriptionTier || "Free"}
+                Subscription: {rateLimitStatus?.tier || "Free"}
               </p>
               <p className="text-sm text-muted-foreground">
                 Joined:{" "}
-                {user?.$createdAt
-                  ? new Date(user.$createdAt).toLocaleDateString()
+                {user?.registration
+                  ? new Date(user.registration).toLocaleDateString()
                   : "Unknown"}
               </p>
             </div>
@@ -317,7 +318,7 @@ export default function ProfilePage() {
                 Your session will expire in 3 days from login.
               </p>
             </div>
-            {!user.emailVerification && (
+            {!user?.emailVerification && (
               <Alert variant={"warning"}>
                 <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                 <AlertTitle className="text-sm sm:text-base">
@@ -335,7 +336,7 @@ export default function ProfilePage() {
                 </AlertDescription>
               </Alert>
             )}
-            {user.emailVerification && !user.mfa && (
+            {user?.emailVerification && !user?.mfa && (
               <Alert variant={"warning"}>
                 <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                 <AlertTitle className="text-sm sm:text-base">

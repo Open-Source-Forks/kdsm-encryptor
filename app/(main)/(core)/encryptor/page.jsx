@@ -34,7 +34,7 @@ import { AlertTriangle } from "lucide-react";
 import FlowingMenu from "@/components/ui/FlowingMenu";
 import Link from "next/link";
 import TextType from "@/components/ui/TextType";
-import KaomojiDropdown from "./../../../../components/ui/KaomojiDropdown";
+import KaomojiDrawer from "@/components/ui/KaomojiDrawer";
 import UpdatesAccordion from "@/components/UpdatesAccordion";
 
 // Define constants with corrected emoji regex
@@ -43,8 +43,7 @@ const KEY_END_MARKER = "[KDSM_KEY_END]";
 const EMOJI_REGEX =
   /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]|[\u{FE00}-\u{FE0F}]|[\u{1F004}]|[\u{1F0CF}]|[\u{1F18E}]|[\u{3030}]|[\u{2B50}]|[\u{2B55}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{3297}]|[\u{3299}]|[\u{303D}]|[\u{00A9}]|[\u{00AE}]|[\u{2122}]|[\u{23F3}]|[\u{24C2}]|[\u{23E9}-\u{23F3}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]/gu;
 const COPY_TIMEOUT = 2000;
-const MAX_MESSAGE_LENGTH = 20000;
-const MAX_KEY_LENGTH = 200;
+const MAX_KEY_LENGTH = 100;
 
 export default function Home() {
   // State management with useState hooks
@@ -327,22 +326,7 @@ export default function Home() {
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck="false"
-                maxLength={MAX_MESSAGE_LENGTH}
               />
-              <div className="flex justify-end">
-                <span
-                  className={`text-xs sm:text-sm ${
-                    formState.message.length > MAX_MESSAGE_LENGTH * 0.9
-                      ? "text-destructive font-semibold"
-                      : formState.message.length > MAX_MESSAGE_LENGTH * 0.75
-                      ? "text-orange-500"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {formState.message.length.toLocaleString()} /{" "}
-                  {MAX_MESSAGE_LENGTH.toLocaleString()} characters
-                </span>
-              </div>
               <Alert>
                 <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                 <AlertTitle className="text-sm sm:text-base">
@@ -352,7 +336,7 @@ export default function Home() {
                   For security reasons, emojis will be automatically removed
                   from your message during encryption. If you want to include
                   emotions try out{" "}
-                  <KaomojiDropdown
+                  <KaomojiDrawer
                     text={"Our Kaomojis"}
                     onSelectKaomoji={(kaomoji) =>
                       setFormState((prev) => ({
