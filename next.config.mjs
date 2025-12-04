@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {},
   // Suppress React DevTools semver error with React 19
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
