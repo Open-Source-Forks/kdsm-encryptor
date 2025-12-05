@@ -92,9 +92,11 @@ const ShareModal = ({ isOpen, onClose, encryptedMessage, encryptionKey }) => {
   // Memoized share message without encryption key
   const shareMessage = useMemo(() => {
     if (!shareUrl) return "";
-    const baseMessage = `(^_^) Try decrypting this message using KDSM Encryptor!\n\n Click the link below to decrypt:\n${shareUrl}\n\n Secure. Simple. Powerful.\n\n#KDSMEncryptor #Encryption #Security`;
+    const baseMessage = `(^_^) Try decrypting this message using KDSM Encryptor!\n\n 
+    ${formData.hangman ? "Play Hangman to guess the decryption key!" : ""}\n\n
+    Click the link below to decrypt:\n${shareUrl}\n\n Secure. Simple. Powerful.\n\n#KDSMEncryptor #Encryption #Security`;
     return baseMessage;
-  }, [shareUrl]);
+  }, [shareUrl, formData.hangman]);
 
   // Memoized platform configurations
   const platforms = useMemo(

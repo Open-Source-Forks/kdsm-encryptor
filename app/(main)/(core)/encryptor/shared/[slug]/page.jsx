@@ -40,7 +40,7 @@ import {
 } from "@/lib/robotLogic";
 
 const COPY_TIMEOUT = 2000;
-// TODO: remaining Starter hint, Character type hints 
+// TODO: remaining Starter hint, Character type hints
 export default function Page() {
   const { slug } = useParams();
   const router = useRouter();
@@ -82,7 +82,7 @@ export default function Page() {
   // Load game state from localStorage
   useEffect(() => {
     if (!slug) return;
-    
+
     const savedState = localStorage.getItem(getStorageKey());
     if (savedState) {
       try {
@@ -98,15 +98,21 @@ export default function Page() {
   // Save game state to localStorage whenever it changes
   useEffect(() => {
     if (!slug || !gameConfig.hangmanEnabled) return;
-    
+
     const stateToSave = {
       gameState,
       decryptedResult,
       timestamp: Date.now(),
     };
-    
+
     localStorage.setItem(getStorageKey(), JSON.stringify(stateToSave));
-  }, [gameState, decryptedResult, slug, gameConfig.hangmanEnabled, getStorageKey]);
+  }, [
+    gameState,
+    decryptedResult,
+    slug,
+    gameConfig.hangmanEnabled,
+    getStorageKey,
+  ]);
 
   // Clear game state from localStorage when game ends
   const clearGameState = useCallback(() => {
@@ -128,19 +134,19 @@ export default function Page() {
 
         setEncryptedMessage(result.encMessage);
         setExpiresAt(result.expiresAt);
-        
+        const actualKey = decrypt(result.encryptedActualKey, slug);
         // Set game configuration from API
         setGameConfig({
           hangmanEnabled: result.hangman || false,
           tries: result.tries || -1,
-          actualKey: result.actualKey,
+          actualKey: actualKey,
           expireSeconds: result.expireSeconds || 300,
         });
 
         // Initialize hangman hints if enabled
         if (result.hangman) {
-          const initialHints = getInitialHint(result.actualKey);
-          setGameState(prev => ({
+          const initialHints = getInitialHint(actualKey);
+          setGameState((prev) => ({
             ...prev,
             revealedChars: initialHints,
           }));
@@ -202,8 +208,12 @@ export default function Page() {
         setTimeRemaining(`${seconds}s`);
       }
 
-      // Update hangman hints based on time 
-      if (gameConfig.hangmanEnabled && gameConfig.actualKey && gameConfig.expireSeconds > 0) {
+      // Update hangman hints based on time
+      if (
+        gameConfig.hangmanEnabled &&
+        gameConfig.actualKey &&
+        gameConfig.expireSeconds > 0
+      ) {
         const totalTime = gameConfig.expireSeconds * 1000;
         const elapsed = totalTime - diff;
         const timePercentage = (elapsed / totalTime) * 100;
@@ -215,23 +225,29 @@ export default function Page() {
           gameState.revealedChars
         );
         if (updatedReveals.length !== gameState.revealedChars.length) {
-          setGameState(prev => ({
+          setGameState((prev) => ({
             ...prev,
             revealedChars: updatedReveals,
           }));
         }
-
-        // Update character type hints
-        const typeHints = getCharacterTypeHints(gameConfig.actualKey, timePercentage);
-        if (JSON.stringify(typeHints) !== JSON.stringify(gameState.characterTypeHints)) {
-          setGameState(prev => ({
-            ...prev,
-            characterTypeHints: typeHints,
-          }));
+        if (gameConfig.tries !== -1) {
+          // Update character type hints
+          const typeHints = getCharacterTypeHints(
+            gameConfig.actualKey,
+            timePercentage
+          );
+          if (
+            JSON.stringify(typeHints) !==
+            JSON.stringify(gameState.characterTypeHints)
+          ) {
+            setGameState((prev) => ({
+              ...prev,
+              characterTypeHints: typeHints,
+            }));
+          }
         }
       }
     };
-
     // Initial update
     updateCountdown();
 
@@ -244,7 +260,12 @@ export default function Page() {
         clearInterval(timerRef.current);
       }
     };
-  }, [expiresAt, gameConfig, gameState.revealedChars, gameState.characterTypeHints]);
+  }, [
+    expiresAt,
+    gameConfig,
+    gameState.revealedChars,
+    gameState.characterTypeHints,
+  ]);
 
   // Handle user key input change
   const handleKeyChange = useCallback((e) => {
@@ -267,7 +288,7 @@ export default function Page() {
       if (gameConfig.hangmanEnabled) {
         if (userEnteredKey === gameConfig.actualKey) {
           // Correct guess - Win!
-          setGameState(prev => ({ ...prev, gameWon: true }));
+          setGameState((prev) => ({ ...prev, gameWon: true }));
           const decryptedMessage = decrypt(encryptedMessage, userEnteredKey);
           setDecryptedResult(decryptedMessage);
 
@@ -280,18 +301,21 @@ export default function Page() {
         } else {
           // Wrong guess
           const newFailedAttempts = gameState.failedAttempts + 1;
-          setGameState(prev => ({
+          setGameState((prev) => ({
             ...prev,
             failedAttempts: newFailedAttempts,
           }));
 
           // Check if game is lost (only for limited tries)
-          if (gameConfig.tries !== -1 && isGameLost(gameConfig.tries, newFailedAttempts)) {
-            setGameState(prev => ({ ...prev, gameLost: true }));
-            
+          if (
+            gameConfig.tries !== -1 &&
+            isGameLost(gameConfig.tries, newFailedAttempts)
+          ) {
+            setGameState((prev) => ({ ...prev, gameLost: true }));
+
             // Clear game state from localStorage on loss
             clearGameState();
-            
+
             toast.error("Game Over", {
               description: "Robot fully assembled. Message locked forever.",
             });
@@ -300,7 +324,9 @@ export default function Page() {
               description:
                 gameConfig.tries === -1
                   ? "Try again! Use the hints."
-                  : `Wrong! ${gameConfig.tries - newFailedAttempts} tries remaining.`,
+                  : `Wrong! ${
+                      gameConfig.tries - newFailedAttempts
+                    } tries remaining.`,
             });
           }
 
@@ -320,17 +346,20 @@ export default function Page() {
 
       if (gameConfig.hangmanEnabled) {
         const newFailedAttempts = gameState.failedAttempts + 1;
-        setGameState(prev => ({
+        setGameState((prev) => ({
           ...prev,
           failedAttempts: newFailedAttempts,
         }));
 
-        if (gameConfig.tries !== -1 && isGameLost(gameConfig.tries, newFailedAttempts)) {
-          setGameState(prev => ({ ...prev, gameLost: true }));
-          
+        if (
+          gameConfig.tries !== -1 &&
+          isGameLost(gameConfig.tries, newFailedAttempts)
+        ) {
+          setGameState((prev) => ({ ...prev, gameLost: true }));
+
           // Clear game state from localStorage on loss
           clearGameState();
-          
+
           toast.error("Game Over", {
             description: "Robot fully assembled. Message locked forever.",
           });
@@ -339,7 +368,9 @@ export default function Page() {
             description:
               gameConfig.tries === -1
                 ? "Incorrect! Try again."
-                : `Wrong! ${gameConfig.tries - newFailedAttempts} tries remaining.`,
+                : `Wrong! ${
+                    gameConfig.tries - newFailedAttempts
+                  } tries remaining.`,
           });
         }
 
@@ -507,56 +538,65 @@ export default function Page() {
             )}
 
             {/* Hangman Game Display */}
-            {gameConfig.hangmanEnabled && !gameState.gameWon && !gameState.gameLost && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
-                {/* Robot Visual (only if tries !== -1) */}
-                {gameConfig.tries !== -1 && (
-                  <div className="flex flex-col items-center space-y-3 p-4 border rounded-md bg-muted/30">
-                    <div className="text-sm font-medium text-center">
-                      Robot Assembly Progress
+            {gameConfig.hangmanEnabled &&
+              !gameState.gameWon &&
+              !gameState.gameLost && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  {/* Robot Visual (only if tries !== -1) */}
+                  {gameConfig.tries !== -1 && (
+                    <div className="flex flex-col items-center space-y-3 p-4 border rounded-md bg-muted/30">
+                      <div className="text-sm font-medium text-center">
+                        Robot Assembly Progress
+                      </div>
+                      <RobotHangman
+                        visibleParts={getVisibleRobotParts(
+                          gameConfig.tries,
+                          gameState.failedAttempts
+                        )}
+                      />
+                      <div className="text-sm text-muted-foreground">
+                        {gameConfig.tries - gameState.failedAttempts} tries
+                        remaining
+                      </div>
                     </div>
-                    <RobotHangman
-                      visibleParts={getVisibleRobotParts(gameConfig.tries, gameState.failedAttempts)}
-                    />
-                    <div className="text-sm text-muted-foreground">
-                      {gameConfig.tries - gameState.failedAttempts} tries remaining
+                  )}
+
+                  {/* Key Hint Display */}
+                  <div className="space-y-3 p-4 border rounded-md bg-primary/5">
+                    <Label className="text-sm font-medium">Key Hint</Label>
+                    <div className="text-2xl font-mono tracking-widest text-center p-4 bg-background rounded border">
+                      {generateHintDisplay(
+                        gameConfig.actualKey,
+                        gameState.revealedChars
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground text-center">
+                      {gameConfig.actualKey.length} characters total
                     </div>
                   </div>
-                )}
 
-                {/* Key Hint Display */}
-                <div className="space-y-3 p-4 border rounded-md bg-primary/5">
-                  <Label className="text-sm font-medium">Key Hint</Label>
-                  <div className="text-2xl font-mono tracking-widest text-center p-4 bg-background rounded border">
-                    {generateHintDisplay(gameConfig.actualKey, gameState.revealedChars)}
-                  </div>
-                  <div className="text-xs text-muted-foreground text-center">
-                    {gameConfig.actualKey.length} characters total
-                  </div>
-                </div>
-
-                {/* Character Type Hints */}
-                {gameState.characterTypeHints.length > 0 && (
-                  <Alert className="bg-blue-500/10 border-blue-500/20">
-                    <AlertCircle className="h-4 w-4 text-blue-500" />
-                    <AlertTitle className="text-blue-500">
-                      Character Type Hints
-                    </AlertTitle>
-                    <AlertDescription className="text-blue-500/80">
-                      <ul className="list-disc list-inside space-y-1 mt-2">
-                        {gameState.characterTypeHints.map((hint, index) => (
-                          <li key={index}>{hint}</li>
-                        ))}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </motion.div>
-            )}
+                  {/* Character Type Hints */}
+                  {gameState.characterTypeHints.length > 0 && (
+                    <Alert className="bg-blue-500/10 border-blue-500/20">
+                      <AlertCircle className="h-4 w-4 text-blue-500" />
+                      <AlertTitle className="text-blue-500">
+                        Character Type Hints
+                      </AlertTitle>
+                      <AlertDescription className="text-blue-500/80">
+                        <ul className="list-disc list-inside space-y-1 mt-2">
+                          {gameState.characterTypeHints.map((hint, index) => (
+                            <li key={index}>{hint}</li>
+                          ))}
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </motion.div>
+              )}
 
             {/* Game Lost State */}
             {gameState.gameLost && (
@@ -611,7 +651,11 @@ export default function Page() {
                     spellCheck="false"
                     disabled={isDecrypting || gameState.gameWon}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && !isDecrypting && !gameState.gameWon) {
+                      if (
+                        e.key === "Enter" &&
+                        !isDecrypting &&
+                        !gameState.gameWon
+                      ) {
                         handleDecrypt();
                       }
                     }}
@@ -621,18 +665,24 @@ export default function Page() {
 
                 <Button
                   onClick={handleDecrypt}
-                  disabled={isDecrypting || !userEnteredKey.trim() || gameState.gameWon}
+                  disabled={
+                    isDecrypting || !userEnteredKey.trim() || gameState.gameWon
+                  }
                   className="w-full"
                 >
                   {isDecrypting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {gameConfig.hangmanEnabled ? "Checking..." : "Decrypting..."}
+                      {gameConfig.hangmanEnabled
+                        ? "Checking..."
+                        : "Decrypting..."}
                     </>
                   ) : (
                     <>
                       <Shield className="w-4 h-4 mr-2" />
-                      {gameConfig.hangmanEnabled ? "Submit Guess" : "Decrypt Message"}
+                      {gameConfig.hangmanEnabled
+                        ? "Submit Guess"
+                        : "Decrypt Message"}
                     </>
                   )}
                 </Button>

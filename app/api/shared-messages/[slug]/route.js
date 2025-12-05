@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Client, Databases, Query } from "node-appwrite";
 import { config, collections } from "@/lib/appwrite/kdsm";
+import { encrypt } from "@/utils/kdsm";
 
 /**
  * GET - Retrieve a shared encrypted message by slug
@@ -64,7 +65,7 @@ export async function GET(request, { params }) {
       success: true,
       data: {
         encMessage: document.enc_message,
-        actualKey: document.actual_key,
+        encryptedActualKey: encrypt(document.actual_key, slug),
         isExpired: false,
         expiresAt: expiresAt.toISOString(),
         hangman: document.hangman || false,

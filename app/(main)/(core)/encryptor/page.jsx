@@ -586,12 +586,14 @@ export default function Home() {
         </Card>
       </motion.div>
       {/* Share Modal */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={handleShareToggle}
-        encryptedMessage={formState.encryptedResult}
-        encryptionKey={formState.lastUsedKey}
-      />
+      {isShareModalOpen && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={handleShareToggle}
+          encryptedMessage={formState.encryptedResult}
+          encryptionKey={formState.lastUsedKey}
+        />
+      )}
     </div>
   );
 }

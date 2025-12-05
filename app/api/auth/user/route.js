@@ -36,7 +36,8 @@ export async function GET(request) {
         status: user.status,
         labels: user.labels,
         phone: user.phone,
-        phoneVerification: user.phoneVerification
+        phoneVerification: user.phoneVerification,
+        prefs: user.prefs
       }
     });
   } catch (error) {

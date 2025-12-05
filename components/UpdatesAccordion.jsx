@@ -30,7 +30,7 @@ export default function UpdatesAccordion() {
               </li>
               <li>
                 CryptoPass Delivery (Coming Soon!) - Granularly control your new
-                auto-generated generated password for your applications while
+                auto-generated password for your applications while
                 receiving it securely via encrypted email (Only you can crack it
                 via your private key).
               </li>
