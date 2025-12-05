@@ -1,10 +1,24 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="320" viewBox="0 0 200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Left Leg Upper -->
-  <rect x="70" y="190" width="25" height="60" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <rect x="70" y="190" width="25" height="70" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
   <!-- Knee joint -->
-  <circle cx="82.5" cy="250" r="7" fill="#3a3e4a" stroke="#4a5568" stroke-width="3"/>
+  <circle cx="82.5" cy="260" r="7" fill="#3a3e4a" stroke="#4a5568" stroke-width="3"/>
   <!-- Lower leg -->
-  <rect x="73" y="255" width="19" height="50" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
-  <!-- Foot -->
-  <rect x="70" y="305" width="30" height="12" rx="3" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <rect x="73" y="265" width="19" height="58" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Ankle actuator -->
+  <rect x="74" y="321" width="17" height="8" rx="2" fill="#3a3e4a" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="77" cy="325" r="1.5" fill="#4a5568"/>
+  <circle cx="88" cy="325" r="1.5" fill="#4a5568"/>
+  <!-- Boot top -->
+  <rect x="70" y="328" width="25" height="6" rx="2" fill="#2a2e3a" stroke="#4a5568" stroke-width="2"/>
+  <!-- Boot main body -->
+  <path d="M 70 333 L 68 342 L 68 346 Q 68 348 70 348 L 98 348 Q 100 348 100 346 L 100 342 L 98 333 Z" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Toe cap -->
+  <ellipse cx="84" cy="345" rx="14" ry="4" fill="#3a3e4a" stroke="#4a5568" stroke-width="2"/>
+  <!-- Tread pattern -->
+  <rect x="72" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="77" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="82" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="87" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="92" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
 </svg>

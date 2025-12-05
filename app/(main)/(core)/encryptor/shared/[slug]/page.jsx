@@ -29,13 +29,21 @@ import {
 import { motion } from "framer-motion";
 import { getSharedMessage } from "@/lib/shareEncryptedMsgs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import RobotHangman from "@/components/RobotHangman";
+import {
+  getVisibleRobotParts,
+  isGameLost,
+  generateHintDisplay,
+  getInitialHint,
+  getTimeBasedHints,
+  getCharacterTypeHints,
+} from "@/lib/robotLogic";
 
 const COPY_TIMEOUT = 2000;
-
+// TODO: remaining Starter hint, Character type hints 
 export default function Page() {
-  const params = useParams();
+  const { slug } = useParams();
   const router = useRouter();
-  const slug = params.slug;
 
   // State management
   const [encryptedMessage, setEncryptedMessage] = useState("");
@@ -48,9 +56,62 @@ export default function Page() {
   const [copyState, setCopyState] = useState(false);
   const [error, setError] = useState(null);
 
+  // Hangman game state (consolidated)
+  const [gameConfig, setGameConfig] = useState({
+    hangmanEnabled: false,
+    tries: -1,
+    actualKey: "",
+    expireSeconds: 0,
+  });
+
+  const [gameState, setGameState] = useState({
+    failedAttempts: 0,
+    revealedChars: [],
+    gameWon: false,
+    gameLost: false,
+    characterTypeHints: [],
+  });
+
   // Refs for DOM elements
   const containerRef = useRef(null);
   const timerRef = useRef(null);
+
+  // LocalStorage key for game state
+  const getStorageKey = useCallback(() => `hangman_game_${slug}`, [slug]);
+
+  // Load game state from localStorage
+  useEffect(() => {
+    if (!slug) return;
+    
+    const savedState = localStorage.getItem(getStorageKey());
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setGameState(parsed.gameState);
+        setDecryptedResult(parsed.decryptedResult || "");
+      } catch (error) {
+        console.error("Failed to parse saved game state:", error);
+      }
+    }
+  }, [slug, getStorageKey]);
+
+  // Save game state to localStorage whenever it changes
+  useEffect(() => {
+    if (!slug || !gameConfig.hangmanEnabled) return;
+    
+    const stateToSave = {
+      gameState,
+      decryptedResult,
+      timestamp: Date.now(),
+    };
+    
+    localStorage.setItem(getStorageKey(), JSON.stringify(stateToSave));
+  }, [gameState, decryptedResult, slug, gameConfig.hangmanEnabled, getStorageKey]);
+
+  // Clear game state from localStorage when game ends
+  const clearGameState = useCallback(() => {
+    localStorage.removeItem(getStorageKey());
+  }, [getStorageKey]);
 
   // Fetch shared message on component mount
   useEffect(() => {
@@ -67,10 +128,31 @@ export default function Page() {
 
         setEncryptedMessage(result.encMessage);
         setExpiresAt(result.expiresAt);
-
-        toast.success("Message Loaded", {
-          description: "Enter the encryption key to decrypt this message",
+        
+        // Set game configuration from API
+        setGameConfig({
+          hangmanEnabled: result.hangman || false,
+          tries: result.tries || -1,
+          actualKey: result.actualKey,
+          expireSeconds: result.expireSeconds || 300,
         });
+
+        // Initialize hangman hints if enabled
+        if (result.hangman) {
+          const initialHints = getInitialHint(result.actualKey);
+          setGameState(prev => ({
+            ...prev,
+            revealedChars: initialHints,
+          }));
+
+          toast.success("Hangman Mode Active!", {
+            description: "Guess the encryption key to decrypt the message",
+          });
+        } else {
+          toast.success("Message Loaded", {
+            description: "Enter the encryption key to decrypt this message",
+          });
+        }
       } catch (error) {
         console.error("Failed to fetch shared message:", error);
         setError(error.message || "Failed to load the shared message");
@@ -108,13 +190,45 @@ export default function Page() {
         return;
       }
 
-      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
 
-      if (minutes > 0) {
+      if (hours > 0) {
+        setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
         setTimeRemaining(`${minutes}m ${seconds}s`);
       } else {
         setTimeRemaining(`${seconds}s`);
+      }
+
+      // Update hangman hints based on time 
+      if (gameConfig.hangmanEnabled && gameConfig.actualKey && gameConfig.expireSeconds > 0) {
+        const totalTime = gameConfig.expireSeconds * 1000;
+        const elapsed = totalTime - diff;
+        const timePercentage = (elapsed / totalTime) * 100;
+
+        // Update character reveals
+        const updatedReveals = getTimeBasedHints(
+          gameConfig.actualKey,
+          timePercentage,
+          gameState.revealedChars
+        );
+        if (updatedReveals.length !== gameState.revealedChars.length) {
+          setGameState(prev => ({
+            ...prev,
+            revealedChars: updatedReveals,
+          }));
+        }
+
+        // Update character type hints
+        const typeHints = getCharacterTypeHints(gameConfig.actualKey, timePercentage);
+        if (JSON.stringify(typeHints) !== JSON.stringify(gameState.characterTypeHints)) {
+          setGameState(prev => ({
+            ...prev,
+            characterTypeHints: typeHints,
+          }));
+        }
       }
     };
 
@@ -130,7 +244,7 @@ export default function Page() {
         clearInterval(timerRef.current);
       }
     };
-  }, [expiresAt]);
+  }, [expiresAt, gameConfig, gameState.revealedChars, gameState.characterTypeHints]);
 
   // Handle user key input change
   const handleKeyChange = useCallback((e) => {
@@ -149,21 +263,104 @@ export default function Page() {
     setIsDecrypting(true);
 
     try {
-      const decryptedMessage = decrypt(encryptedMessage, userEnteredKey);
-      setDecryptedResult(decryptedMessage);
+      // Hangman mode: check if guess is correct
+      if (gameConfig.hangmanEnabled) {
+        if (userEnteredKey === gameConfig.actualKey) {
+          // Correct guess - Win!
+          setGameState(prev => ({ ...prev, gameWon: true }));
+          const decryptedMessage = decrypt(encryptedMessage, userEnteredKey);
+          setDecryptedResult(decryptedMessage);
 
-      toast.success("Message Decrypted", {
-        description: "The message has been decrypted successfully!",
-      });
+          // Clear game state from localStorage on win
+          clearGameState();
+
+          toast.success("🎉 You Won!", {
+            description: "Correct key! Message decrypted successfully!",
+          });
+        } else {
+          // Wrong guess
+          const newFailedAttempts = gameState.failedAttempts + 1;
+          setGameState(prev => ({
+            ...prev,
+            failedAttempts: newFailedAttempts,
+          }));
+
+          // Check if game is lost (only for limited tries)
+          if (gameConfig.tries !== -1 && isGameLost(gameConfig.tries, newFailedAttempts)) {
+            setGameState(prev => ({ ...prev, gameLost: true }));
+            
+            // Clear game state from localStorage on loss
+            clearGameState();
+            
+            toast.error("Game Over", {
+              description: "Robot fully assembled. Message locked forever.",
+            });
+          } else {
+            toast.error("Wrong Key", {
+              description:
+                gameConfig.tries === -1
+                  ? "Try again! Use the hints."
+                  : `Wrong! ${gameConfig.tries - newFailedAttempts} tries remaining.`,
+            });
+          }
+
+          setUserEnteredKey(""); // Clear input
+        }
+      } else {
+        // Normal mode (no hangman)
+        const decryptedMessage = decrypt(encryptedMessage, userEnteredKey);
+        setDecryptedResult(decryptedMessage);
+
+        toast.success("Message Decrypted", {
+          description: "The message has been decrypted successfully!",
+        });
+      }
     } catch (error) {
       console.error("Decryption error:", error);
-      toast.error("Decryption Failed", {
-        description: "The encryption key you entered is incorrect",
-      });
+
+      if (gameConfig.hangmanEnabled) {
+        const newFailedAttempts = gameState.failedAttempts + 1;
+        setGameState(prev => ({
+          ...prev,
+          failedAttempts: newFailedAttempts,
+        }));
+
+        if (gameConfig.tries !== -1 && isGameLost(gameConfig.tries, newFailedAttempts)) {
+          setGameState(prev => ({ ...prev, gameLost: true }));
+          
+          // Clear game state from localStorage on loss
+          clearGameState();
+          
+          toast.error("Game Over", {
+            description: "Robot fully assembled. Message locked forever.",
+          });
+        } else {
+          toast.error("Wrong Key", {
+            description:
+              gameConfig.tries === -1
+                ? "Incorrect! Try again."
+                : `Wrong! ${gameConfig.tries - newFailedAttempts} tries remaining.`,
+          });
+        }
+
+        setUserEnteredKey("");
+      } else {
+        toast.error("Decryption Failed", {
+          description: "The encryption key you entered is incorrect",
+        });
+      }
     } finally {
       setIsDecrypting(false);
     }
-  }, [encryptedMessage, userEnteredKey]);
+  }, [
+    encryptedMessage,
+    userEnteredKey,
+    gameConfig.hangmanEnabled,
+    gameConfig.actualKey,
+    gameConfig.tries,
+    gameState.failedAttempts,
+    clearGameState,
+  ]);
 
   // Copy decrypted message to clipboard
   const copyToClipboard = useCallback((text) => {
@@ -309,6 +506,70 @@ export default function Page() {
               </Alert>
             )}
 
+            {/* Hangman Game Display */}
+            {gameConfig.hangmanEnabled && !gameState.gameWon && !gameState.gameLost && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                {/* Robot Visual (only if tries !== -1) */}
+                {gameConfig.tries !== -1 && (
+                  <div className="flex flex-col items-center space-y-3 p-4 border rounded-md bg-muted/30">
+                    <div className="text-sm font-medium text-center">
+                      Robot Assembly Progress
+                    </div>
+                    <RobotHangman
+                      visibleParts={getVisibleRobotParts(gameConfig.tries, gameState.failedAttempts)}
+                    />
+                    <div className="text-sm text-muted-foreground">
+                      {gameConfig.tries - gameState.failedAttempts} tries remaining
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Hint Display */}
+                <div className="space-y-3 p-4 border rounded-md bg-primary/5">
+                  <Label className="text-sm font-medium">Key Hint</Label>
+                  <div className="text-2xl font-mono tracking-widest text-center p-4 bg-background rounded border">
+                    {generateHintDisplay(gameConfig.actualKey, gameState.revealedChars)}
+                  </div>
+                  <div className="text-xs text-muted-foreground text-center">
+                    {gameConfig.actualKey.length} characters total
+                  </div>
+                </div>
+
+                {/* Character Type Hints */}
+                {gameState.characterTypeHints.length > 0 && (
+                  <Alert className="bg-blue-500/10 border-blue-500/20">
+                    <AlertCircle className="h-4 w-4 text-blue-500" />
+                    <AlertTitle className="text-blue-500">
+                      Character Type Hints
+                    </AlertTitle>
+                    <AlertDescription className="text-blue-500/80">
+                      <ul className="list-disc list-inside space-y-1 mt-2">
+                        {gameState.characterTypeHints.map((hint, index) => (
+                          <li key={index}>{hint}</li>
+                        ))}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </motion.div>
+            )}
+
+            {/* Game Lost State */}
+            {gameState.gameLost && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Game Over!</AlertTitle>
+                <AlertDescription>
+                  The robot is fully assembled. The message remains locked
+                  forever.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Encrypted Message Display */}
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-md bg-muted/30">
               <Label className="text-sm sm:text-base">Encrypted Message</Label>
@@ -317,57 +578,66 @@ export default function Page() {
               </div>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label
-                  htmlFor="decryption-key"
-                  className="text-sm sm:text-base"
-                >
-                  Enter Encryption Key
-                </Label>
-                <Input
-                  id="decryption-key"
-                  type="text"
-                  placeholder="Enter the key to decrypt the message..."
-                  value={userEnteredKey}
-                  onChange={handleKeyChange}
-                  className={`w-full text-sm sm:text-base`}
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  disabled={isDecrypting}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !isDecrypting) {
-                      handleDecrypt();
-                    }
-                  }}
-                  secured={true}
-                />
-              </div>
-
-              <Button
-                onClick={handleDecrypt}
-                disabled={isDecrypting || !userEnteredKey.trim()}
-                className="w-full"
+            {/* Key Input Section - Always visible unless game is lost */}
+            {!gameState.gameLost && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="space-y-4"
               >
-                {isDecrypting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Decrypting...
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4 mr-2" />
-                    Decrypt Message
-                  </>
-                )}
-              </Button>
-            </motion.div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="decryption-key"
+                    className="text-sm sm:text-base"
+                  >
+                    {gameConfig.hangmanEnabled
+                      ? "Guess the Encryption Key"
+                      : "Enter Encryption Key"}
+                  </Label>
+                  <Input
+                    id="decryption-key"
+                    type="text"
+                    placeholder={
+                      gameConfig.hangmanEnabled
+                        ? "Type your guess..."
+                        : "Enter the key to decrypt the message..."
+                    }
+                    value={userEnteredKey}
+                    onChange={handleKeyChange}
+                    className={`w-full text-sm sm:text-base`}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    disabled={isDecrypting || gameState.gameWon}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !isDecrypting && !gameState.gameWon) {
+                        handleDecrypt();
+                      }
+                    }}
+                    secured={true}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleDecrypt}
+                  disabled={isDecrypting || !userEnteredKey.trim() || gameState.gameWon}
+                  className="w-full"
+                >
+                  {isDecrypting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {gameConfig.hangmanEnabled ? "Checking..." : "Decrypting..."}
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-4 h-4 mr-2" />
+                      {gameConfig.hangmanEnabled ? "Submit Guess" : "Decrypt Message"}
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
 
             {/* Decrypted Result */}
             {decryptedResult && (

@@ -1,10 +1,24 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="320" viewBox="0 0 200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Right Leg Upper -->
-  <rect x="105" y="190" width="25" height="60" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <rect x="105" y="190" width="25" height="70" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
   <!-- Knee joint -->
-  <circle cx="117.5" cy="250" r="7" fill="#3a3e4a" stroke="#4a5568" stroke-width="3"/>
+  <circle cx="117.5" cy="260" r="7" fill="#3a3e4a" stroke="#4a5568" stroke-width="3"/>
   <!-- Lower leg -->
-  <rect x="108" y="255" width="19" height="50" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
-  <!-- Foot -->
-  <rect x="100" y="305" width="30" height="12" rx="3" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <rect x="108" y="265" width="19" height="58" rx="4" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Ankle actuator -->
+  <rect x="109" y="321" width="17" height="8" rx="2" fill="#3a3e4a" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="112" cy="325" r="1.5" fill="#4a5568"/>
+  <circle cx="123" cy="325" r="1.5" fill="#4a5568"/>
+  <!-- Boot top -->
+  <rect x="105" y="328" width="25" height="6" rx="2" fill="#2a2e3a" stroke="#4a5568" stroke-width="2"/>
+  <!-- Boot main body -->
+  <path d="M 130 333 L 132 342 L 132 346 Q 132 348 130 348 L 102 348 Q 100 348 100 346 L 100 342 L 102 333 Z" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  <!-- Toe cap -->
+  <ellipse cx="116" cy="345" rx="14" ry="4" fill="#3a3e4a" stroke="#4a5568" stroke-width="2"/>
+  <!-- Tread pattern -->
+  <rect x="105" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="110" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="115" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="120" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
+  <rect x="125" y="347" width="3" height="2" rx="0.5" fill="#1a1d26"/>
 </svg>

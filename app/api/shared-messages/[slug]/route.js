@@ -7,8 +7,7 @@ import { config, collections } from "@/lib/appwrite/kdsm";
  */
 export async function GET(request, { params }) {
   try {
-    const { slug } = params;
-
+    const { slug } = await params;
     if (!slug || slug.length !== 10) {
       return NextResponse.json(
         { success: false, error: "Invalid message slug" },
@@ -68,7 +67,9 @@ export async function GET(request, { params }) {
         actualKey: document.actual_key,
         isExpired: false,
         expiresAt: expiresAt.toISOString(),
-        createdAt: document.$createdAt,
+        hangman: document.hangman || false,
+        tries: document.tries || -1,
+        expireSeconds: document.expire_seconds,
       },
     });
   } catch (error) {
@@ -88,7 +89,7 @@ export async function GET(request, { params }) {
  */
 export async function DELETE(request, { params }) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     if (!slug || slug.length !== 10) {
       return NextResponse.json(
