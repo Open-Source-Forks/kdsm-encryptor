@@ -1,24 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ApiKeyManager } from '@/lib/apiKeyManager';
-import { Client, Account } from 'node-appwrite';
-import { config } from '@/lib/appwrite/kdsm';
-
-async function getUserFromSession(request) {
-  try {
-    const sessionToken = request.cookies.get('kdsm-session')?.value;
-    if (!sessionToken) return null;
-
-    const client = new Client()
-      .setEndpoint(config.endpoint)
-      .setProject(config.project_id)
-      .setSession(sessionToken);
-
-    const account = new Account(client);
-    return await account.get();
-  } catch (error) {
-    return null;
-  }
-}
+import { getUserFromSession } from '@/lib/appwrite/kdsm';
 
 export async function DELETE(request, { params }) {
   try {

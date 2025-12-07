@@ -1,26 +1,6 @@
 import { NextResponse } from "next/server";
-import { Client, Account, Databases, ID, Query } from "node-appwrite";
-import { config, collections } from "@/lib/appwrite/kdsm";
-
-/**
- * Get user from session cookie
- */
-async function getUserFromSession(request) {
-  try {
-    const sessionToken = request.cookies.get("kdsm-session")?.value;
-    if (!sessionToken) return null;
-
-    const client = new Client()
-      .setEndpoint(config.endpoint)
-      .setProject(config.project_id)
-      .setSession(sessionToken);
-
-    const account = new Account(client);
-    return await account.get();
-  } catch (error) {
-    return null;
-  }
-}
+import { Client, Databases, ID, Query } from "node-appwrite";
+import { config, collections, getUserFromSession } from "@/lib/appwrite/kdsm";
 
 /**
  * Generate a cryptographically secure 10-character slug

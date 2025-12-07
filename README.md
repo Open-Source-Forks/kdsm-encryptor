@@ -191,6 +191,11 @@ We welcome contributions of all sizes! Whether you're fixing a typo, adding a fe
 
 - [ ] KDSM CLI (For encrypting and decrypting entire files using a secret key)
 - [ ] Paper extraction and decryption of secret messages (Secret Extraction)
+- [ ] Mobile app version (React Native)
+- [ ] Browser extension for quick password generation and message encryption
+- [ ] Community features (Forums, discussions, user groups)
+- [ ] MCP support for enterprise clients
+
 
 For more information on the DEVELOPMENT_PLAN please See the [DEVELOPMENT_PLAN](./DEVELOPMENT_PLAN.md) file for full details.
 
