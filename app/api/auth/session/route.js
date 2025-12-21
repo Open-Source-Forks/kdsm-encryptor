@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { Client, Account } from "node-appwrite";
-import { config } from "@/lib/appwrite/kdsm";
+import { Client, Account, Databases } from "node-appwrite";
+import { collections, config } from "@/lib/appwrite/kdsm";
 
 // Initialize Appwrite client
 const client = new Client()
@@ -32,8 +32,14 @@ export async function POST(request) {
       .setSession(session.secret);
     
     const sessionAccount = new Account(sessionClient);
+    const databases = new Databases(client);
     const user = await sessionAccount.get();
-    
+    await databases.updateDocument(
+      config.database,
+      collections.users,
+      user.$id,
+      { lastLogin: new Date().toISOString() }
+    );
     // Set the session cookie
     const response = NextResponse.json({ 
       success: true, 

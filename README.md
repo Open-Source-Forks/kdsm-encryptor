@@ -7,6 +7,7 @@
 > A secure message encryption-decryption web app using a custom `Keyed Dynamic Shift Matrix (KDSM)` algorithm. Built with **Next.js** for frontend, styled using **shadcn/ui** and **Tailwind CSS**, and optimized for high-performance on large inputs.
 
 > Note: You will probably see a lot of kaomojis as KDSM adopts this as a new trend and they are better than emojis. (◔‿◔)
+
 ---
 
 ![BSL License](https://img.shields.io/badge/license-BSL%201.1-blue)
@@ -23,7 +24,7 @@ We're building something **extraordinary** - a next-generation encryption system
 
 (＄\_＄) The core contributors and maintainers will also get hired by us to work remotely on another project and will be paid handsomely! (\*￣︶￣\*)
 
-### ヾ(＾∇＾) Why KDSM is Cool
+### ヾ(＾ ∇ ＾) Why KDSM is Cool
 
 ![KDSM Algorithm Visualization](./public/assets/kdsm-algorithm-demo.gif)
 _Watch the Keyed Dynamic Shift Matrix in action - where mathematics meets artistry_
@@ -31,7 +32,7 @@ _Watch the Keyed Dynamic Shift Matrix in action - where mathematics meets artist
 ![Performance Benchmarks](./public/assets/performance-comparison.gif)
 _Lightning-fast encryption that scales with your needs_
 
-### (ﾉ◕ヮ◕)ﾉ\*:･ﾟ✧ Performance Benchmarks
+### (ﾉ ◕ ヮ ◕)ﾉ\*:･ﾟ ✧ Performance Benchmarks
 
 Our KDSM algorithm delivers exceptional performance across various input sizes:
 
@@ -45,26 +46,25 @@ _Benchmarks performed on modern hardware with optimized KDSM implementation_
 
 **Key Performance Highlights:**
 
-- (ﾉ◕ヮ◕)ﾉ\*:･ﾟ✧ **Sub-millisecond processing** for typical message sizes
-- (￣▽￣)ノ **Linear scaling** with input size
+- (ﾉ ◕ ヮ ◕)ﾉ\*:･ﾟ ✧ **Sub-millisecond processing** for typical message sizes
+- (￣ ▽ ￣)ノ **Linear scaling** with input size
 - (◔‿◔) **Faster decryption** than encryption by design
 - ヽ(´▽\`)/ **Production-ready performance** for real-time applications
-
 
 ![User Experience](./public/assets/ui-showcase.gif)
 _Beautiful, intuitive interface that makes security accessible to everyone_
 
-### (＾◡＾) What Makes You a Perfect Fit?
+### (＾ ◡ ＾) What Makes You a Perfect Fit?
 
 - **(╯°□°）╯ Problem Solver**: You love tackling complex cryptographic challenges
 - **(｡◕‿◕｡) Full-Stack Enthusiast**: Next.js, React, and modern web technologies excite you
 - **(ಠ_ಠ) Security First**: You understand that privacy isn't optional
 - **(\*\^▽\^\*) Design Conscious**: You believe great security should look beautiful too
-- **ヾ(＾∇＾) Innovation Driven**: You're excited about pushing the boundaries of what's possible
+- **ヾ(＾ ∇ ＾) Innovation Driven**: You're excited about pushing the boundaries of what's possible
 
 ---
 
-## (＾◡＾) Getting Started
+## (＾ ◡ ＾) Getting Started
 
 ### Prerequisites
 
@@ -72,7 +72,7 @@ _Beautiful, intuitive interface that makes security accessible to everyone_
 - Appwrite instance (local or cloud)
 - Basic knowledge of React/Next.js
 
-### (´∀｀) Setting Up the Appwrite Backend
+### (´∀ ｀) Setting Up the Appwrite Backend
 
 1. **Install Appwrite CLI**
 
@@ -141,13 +141,13 @@ npm run dev
 
 ---
 
-## (づ￣ ³￣)づ Contributing
+## (づ￣ ³ ￣)づ Contributing
 
 We welcome contributions of all sizes! Whether you're fixing a typo, adding a feature, or proposing architectural improvements, your input is valuable.
 
 **(｡◕‿◕｡) Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) file for detailed guidelines before making any contributions.**
 
-### (´∀｀) Development Workflow
+### (´∀ ｀) Development Workflow
 
 1. **Fork** the repository
 2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
@@ -165,7 +165,7 @@ We welcome contributions of all sizes! Whether you're fixing a typo, adding a fe
 
 ---
 
-## (￣▽￣)ノ Development Roadmap
+## (￣ ▽ ￣)ノ Development Roadmap
 
 ### Phase 1: (✧◡✧) Core Algorithm
 
@@ -196,8 +196,15 @@ We welcome contributions of all sizes! Whether you're fixing a typo, adding a fe
 - [ ] Community features (Forums, discussions, user groups)
 - [ ] MCP support for enterprise clients
 
+CryptoPass Delivery System
+GitHub Actions (Calls the /api/v2/crypto-pass POST after every day at morning or at the duration set by the user)
+-> Fetches all the cryptoPassDeliveryConfig Documents and sends the email to the verified email address selected by the user this is how it is done
 
-For more information on the DEVELOPMENT_PLAN please See the [DEVELOPMENT_PLAN](./DEVELOPMENT_PLAN.md) file for full details.
+1. Generate the strong password according to the config
+2. Encrypt the password with the key being the security question's answer
+3. Call the user's password update endpoint using a POST method, do API key verification and update the authentication password with the new generated password
+4. Send the email with the encrypted password to the verified email address and let the user decrypt it to gain access to the project dashboard
+   For more information on the DEVELOPMENT_PLAN please See the [DEVELOPMENT_PLAN](./DEVELOPMENT_PLAN.md) file for full details.
 
 ---
 
@@ -211,7 +218,7 @@ For more information on the DEVELOPMENT_PLAN please See the [DEVELOPMENT_PLAN](.
 
 ---
 
-## (´∀｀) License
+## (´∀ ｀) License
 
 KDSM Encryptor is licensed under the Business Source License 1.1.  
 Production use is **not allowed** until **Jan 1, 2028**, when it will be automatically re-licensed under AGPL-3.0+.  
@@ -228,4 +235,3 @@ Ready to be part of something bigger? We'd love to have you aboard!
 ---
 
 _"In a world where privacy is becoming a luxury, we're making it a right."_ - KDSM Team
-

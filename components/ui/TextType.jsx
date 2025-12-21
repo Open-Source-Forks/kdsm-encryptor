@@ -41,7 +41,7 @@ const TextType = ({
   };
 
   const getCurrentTextColor = () => {
-    if (textColors.length === 0) return "oklch(75% 0.183 55.934)";
+    if (textColors.length === 0) return "rgba(220, 20, 60, 0.618)";
     return textColors[currentTextIndex % textColors.length];
   };
 

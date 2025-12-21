@@ -44,7 +44,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="w-full max-w-md text-primary bg-secondary/40 backdrop-blur-md shadow-lg">
+    <Card className="w-full max-w-md text-primary bg-secondary/90 backdrop-blur-md shadow-lg">
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardDescription>

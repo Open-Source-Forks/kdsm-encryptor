@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { Client, Account, ID } from 'node-appwrite';
-import { config } from '@/lib/appwrite/kdsm';
+import { Client, Account, ID, Databases } from 'node-appwrite';
+import { config, collections } from '@/lib/appwrite/kdsm';
+import { encrypt } from '@/utils/kdsm';
 
 // Initialize Appwrite client
 const client = new Client()
@@ -9,25 +10,45 @@ const client = new Client()
   .setKey(config.api_key);
 
 const account = new Account(client);
+const databases = new Databases(client);
 
 export async function POST(request) {
   try {
-    const { email, password, name } = await request.json();
-    
+    const { email, password, name, securityQuestion, answer } = await request.json();
     // Validate input
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !securityQuestion || !answer) {
       return NextResponse.json(
-        { success: false, error: 'Email, password, and name are required' },
+        { success: false, error: 'Email, password, name, security question, and answer are required' },
         { status: 400 }
       );
     }
     
-    // Create user account
+    // Hash password with encrypt for storage in your users collection
+    const passwordHash = encrypt(password, password);
+    
+    // Encrypt the security answer
+    const hashedAnswer = encrypt(answer, password);
+    
+    // Create user account in Appwrite Auth (this also hashes the password internally)
     const user = await account.create(
       ID.unique(),
       email,
       password,
       name
+    );
+
+    // Store additional user data in your custom users collection
+    await databases.createDocument(
+      config.database,
+      collections.users,
+      user.$id, // Use the same ID as the auth user for easy linking
+      {
+        email: user.email,
+        name: user.name,
+        passwordHash, // Store the bcrypt hash
+        securityQuestion: securityQuestion,
+        hashedAnswer,
+      }
     );
 
     // Create email session for the new user

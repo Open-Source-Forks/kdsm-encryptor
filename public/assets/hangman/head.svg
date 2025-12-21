@@ -1,8 +1,28 @@
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Robot Head -->
-  <rect x="60" y="30" width="80" height="70" rx="8" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
-  <!-- Head details -->
+  <!-- Giga Chad Robot Head -->
+  <!-- Upper head/forehead -->
+  <path d="M 65 30 L 135 30 Q 140 30 140 35 L 140 70 L 60 70 L 60 35 Q 60 30 65 30 Z" fill="#2a2e3a" stroke="#4a5568" stroke-width="3"/>
+  
+  <!-- Head details panel -->
   <rect x="65" y="35" width="70" height="8" rx="2" fill="#1a1d26"/>
-  <!-- Jaw line -->
-  <line x1="70" y1="90" x2="130" y2="90" stroke="#4a5568" stroke-width="2"/>
+  
+  <!-- Chiseled cheekbones -->
+  <path d="M 60 70 L 65 80 L 65 90" stroke="#4a5568" stroke-width="2.5" fill="none"/>
+  <path d="M 140 70 L 135 80 L 135 90" stroke="#4a5568" stroke-width="2.5" fill="none"/>
+  
+  <!-- Strong jawline structure -->
+  <path d="M 65 90 L 75 100 L 90 103" stroke="#4a5568" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M 135 90 L 125 100 L 110 103" stroke="#4a5568" stroke-width="3" stroke-linecap="round" fill="none"/>
+  
+  <!-- Defined chin (the chad feature) -->
+  <path d="M 90 103 Q 100 106 110 103" stroke="#4a5568" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <ellipse cx="100" cy="104" rx="8" ry="6" fill="#2a2e3a" stroke="#4a5568" stroke-width="2.5"/>
+  
+  <!-- Jaw shadow/definition -->
+  <path d="M 70 85 Q 75 95 85 100" stroke="#1a1d26" stroke-width="1.5" opacity="0.6" fill="none"/>
+  <path d="M 130 85 Q 125 95 115 100" stroke="#1a1d26" stroke-width="1.5" opacity="0.6" fill="none"/>
+  
+  <!-- Strong jaw plates -->
+  <rect x="65" y="85" width="12" height="10" rx="2" fill="#3a3e4a" stroke="#4a5568" stroke-width="1"/>
+  <rect x="123" y="85" width="12" height="10" rx="2" fill="#3a3e4a" stroke="#4a5568" stroke-width="1"/>
 </svg>

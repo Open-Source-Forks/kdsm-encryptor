@@ -34,7 +34,10 @@ import TextType from "@/components/ui/TextType";
 import Link from "next/link";
 import { getWordsByLength } from "@/utils/constants";
 import UpdatesAccordion from "@/components/UpdatesAccordion";
-// Todo: Secure vault for storing generated passwords with encryption and the ability to export/import securely with the key being the answer to a security question. 
+import SteelSwitch from "@/components/ui/SteelSwitch";
+import SavePasswordPopover from "@/components/SavePassPopover";
+import { Separator } from "@/components/ui/separator";
+// Todo: Secure vault for storing generated passwords with encryption and the ability to export/import securely with the key being the answer to a security question.
 
 const COPY_TIMEOUT = 2000;
 
@@ -50,10 +53,9 @@ export default function PasswordGenerator() {
     useReadablePassword: false,
     customWorded: "",
     generatedPassword: "",
-    showPassword: true,
+    showPassword: false,
   });
   const [copyState, setCopyState] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const containerRef = useRef(null);
 
   const handleOptionChange = useCallback((key, value) => {
@@ -101,8 +103,6 @@ export default function PasswordGenerator() {
       return;
     }
 
-    setIsGenerating(true);
-
     try {
       // Create options object with minimal overhead
       const options = {
@@ -113,7 +113,6 @@ export default function PasswordGenerator() {
         excludeSimilar,
         customWorded: useCustomWord && customWorded ? customWorded : undefined,
         useReadablePassword,
-        getWordsByLength: useReadablePassword ? getWordsByLength : undefined,
       };
 
       const password = await generateKey(length[0], options);
@@ -130,8 +129,6 @@ export default function PasswordGenerator() {
         description:
           error?.message || "An error occurred while generating the password",
       });
-    } finally {
-      setIsGenerating(false);
     }
   }, [formState]); // formState is the only dependency
 
@@ -291,6 +288,8 @@ export default function PasswordGenerator() {
               />
             </div>
 
+            <Separator className="my-4" />
+
             {/* Character Options */}
             <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between">
@@ -363,12 +362,14 @@ export default function PasswordGenerator() {
               </div>
             </div>
 
+            <Separator className="my-4" />
+
             {/* Additional Options */}
             <div className="space-y-3 sm:space-y-4">
               <Label className="text-sm sm:text-base">Additional Options</Label>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <Checkbox
+                  <SteelSwitch
                     id="excludeSimilar"
                     checked={formState.excludeSimilar}
                     onCheckedChange={(checked) =>
@@ -383,7 +384,7 @@ export default function PasswordGenerator() {
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox
+                  <SteelSwitch
                     id="useCustomWord"
                     checked={formState.useCustomWord}
                     onCheckedChange={(checked) => {
@@ -398,7 +399,7 @@ export default function PasswordGenerator() {
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox
+                  <SteelSwitch
                     id="useReadablePassword"
                     checked={formState.useReadablePassword}
                     onCheckedChange={(checked) => {
@@ -443,20 +444,18 @@ export default function PasswordGenerator() {
               </div>
             )}
 
+            <Separator className="my-4" />
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 onClick={generatePassword}
-                disabled={isGenerating}
                 className="w-full sm:w-auto text-sm sm:text-base"
               >
-                {isGenerating ? (
-                  <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                ) : (
-                  <Key className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
+                <Key className="w-4 h-4 sm:w-5 sm:h-5" />
                 Generate Password
               </Button>
+
               <Button
                 onClick={handleClear}
                 variant="outline"
@@ -466,7 +465,6 @@ export default function PasswordGenerator() {
                 <BrushCleaning className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
-
             {/* Generated Password */}
             {formState.generatedPassword && (
               <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-md bg-muted/50">
@@ -520,17 +518,20 @@ export default function PasswordGenerator() {
                   <span>
                     Length: {formState.generatedPassword.length} characters
                   </span>
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>Strength: {passwordStrength.label}</span>
-                  </div>
+                  <SavePasswordPopover password={formState.generatedPassword}/>
                 </div>
               </div>
             )}
           </CardContent>
+
+          <Separator />
+
           <UpdatesAccordion />
+
+          <Separator />
+
           <Link
-            className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
+            className="border-primary/20 p-4 rounded-md text-center text-xl text-accent"
             href={"/docs#free-password-generation-api"}
             target="_blank"
           >
@@ -549,6 +550,9 @@ export default function PasswordGenerator() {
               cursorCharacter="|"
             />
           </Link>
+
+          <Separator />
+
           <div>
             <FlowingMenu />
           </div>

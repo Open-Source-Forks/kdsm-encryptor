@@ -5,6 +5,8 @@
  * which then determines character shifts in a dynamic pattern.
  */
 
+import { getWordsByLength } from "./constants";
+
 // Cache for derived seeds to avoid recalculating for the same key
 const seedCache = new Map();
 
@@ -351,7 +353,6 @@ export async function generateKey(
     excludeSimilar?: boolean; // Exclude similar looking characters like 0, O, l, 1, I
     customWorded?: string; // Custom character set to use instead
     useReadablePassword?: boolean; // Generate readable password with random word prefix
-    getWordsByLength?: (length: number) => string[] | undefined; // Function to get words by length
   }
 ): Promise<string> {
   // Default character sets
@@ -371,7 +372,6 @@ export async function generateKey(
   const includeLowercase = options?.includeLowercase ?? true;
   const excludeSimilar = options?.excludeSimilar ?? false;
   const useReadablePassword = options?.useReadablePassword ?? false;
-  const getWordsByLength = options?.getWordsByLength;
 
   // Build character set efficiently - O(1) since sets are constant size
   const charParts: string[] = [];
@@ -397,7 +397,7 @@ export async function generateKey(
   if (!chars) chars = lowercase;
 
   // Handle readable password generation with random word prefix
-  if (useReadablePassword && getWordsByLength) {
+  if (useReadablePassword) {
     // Formula: word_character_count = (password_length / 2) - 1
     const targetWordLength = Math.floor(length / 2) - 1;
 

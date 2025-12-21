@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Client, Account } from 'node-appwrite';
+import { Client, Account, Databases } from 'node-appwrite';
 import { config } from '@/lib/appwrite/kdsm';
 
 // Get user data using session route
@@ -21,22 +21,27 @@ export async function GET(request) {
       .setSession(sessionId);
     
     const account = new Account(client);
-    
+    const databases = new Databases(client);
+
     // Get user data using the session
     const user = await account.get();
-    
+    const userDoc = await databases.getDocument(
+      config.database,
+      config.collections.users,
+      user.$id
+    );
     return NextResponse.json({ 
       success: true, 
       user: {
         $id: user.$id,
         email: user.email,
         name: user.name,
+        hashedAnswer: userDoc.hashedAnswer,
+        securityQuestion: userDoc.securityQuestion,
         emailVerification: user.emailVerification,
         registration: user.registration,
         status: user.status,
         labels: user.labels,
-        phone: user.phone,
-        phoneVerification: user.phoneVerification,
         prefs: user.prefs
       }
     });

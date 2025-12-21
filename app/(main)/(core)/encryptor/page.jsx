@@ -36,6 +36,7 @@ import Link from "next/link";
 import TextType from "@/components/ui/TextType";
 import KaomojiDrawer from "@/components/ui/KaomojiDrawer";
 import UpdatesAccordion from "@/components/UpdatesAccordion";
+import { Separator } from "@/components/ui/separator";
 
 // Define constants with corrected emoji regex
 const KEY_START_MARKER = "[KDSM_KEY_START]";
@@ -327,6 +328,8 @@ export default function Home() {
                 autoCorrect="off"
                 spellCheck="false"
               />
+              <Separator className="my-4" />
+
               <Alert>
                 <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                 <AlertTitle className="text-sm sm:text-base">
@@ -393,8 +396,9 @@ export default function Home() {
                 </span>
               </div>
             </div>
+            <Separator />
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col justify-center sm:flex-row gap-3 sm:gap-4">
               <Button
                 onClick={handleEncrypt}
                 className="w-full sm:w-auto text-sm sm:text-base"
@@ -417,6 +421,7 @@ export default function Home() {
                 <BrushCleaning className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
+            <Separator className="my-4" />
 
             {formState.encryptedResult && (
               <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-md bg-muted/50">
@@ -541,7 +546,11 @@ export default function Home() {
               </div>
             )}
           </CardContent>
+          <Separator />
+
           <UpdatesAccordion />
+          <Separator />
+
           <Link
             className="border-primary/20 p-4 rounded-md text-center text-xl text-orange-400"
             href={"/docs#encryption-api"}
@@ -563,6 +572,8 @@ export default function Home() {
               cursorCharacter="|"
             />
           </Link>
+          <Separator />
+
           <div>
             <FlowingMenu />
           </div>

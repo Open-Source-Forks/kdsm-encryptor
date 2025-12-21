@@ -61,6 +61,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProfilePage() {
   const { user, logout, loading } = useAuth();
@@ -249,7 +250,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <Card className="w-full text-primary bg-secondary/50 backdrop-blur-md min-h-screen">
+    <Card className="w-full text-primary bg-secondary/90 backdrop-blur-md min-h-screen">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <InitialsAvatar user={user} />
@@ -287,6 +288,8 @@ export default function ProfilePage() {
             alt="KDSM Logo"
           />
         </div>
+        <Separator />
+        {user?.hashedAnswer}
       </CardHeader>
 
       <CardContent>

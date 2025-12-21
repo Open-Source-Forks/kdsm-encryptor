@@ -7,7 +7,7 @@ const AuthContext = createContext({
   loading: true,
   error: null,
   login: async (email, password) => {},
-  register: async (email, password, name) => {},
+  register: async (authData) => {},
   logout: async () => {},
 });
 
@@ -79,17 +79,17 @@ export function AuthProvider({ children }) {
   };
 
   // Register function
-  const register = async (email, password, name) => {
+  const register = async (authData) => {
     setLoading(true);
     setError(null);
-
+    
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify(authData),
         cache: "no-store", // Don't cache POST requests
       });
 

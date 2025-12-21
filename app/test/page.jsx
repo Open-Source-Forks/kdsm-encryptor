@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { runTests } from "@/utils/test-kdsm";
 import RobotHangman from "@/components/RobotHangman";
+import MetroTilesDemo from "@/components/MetroTilesDemo";
 
 export default function TestPage() {
   const [results, setResults] = useState(null);
@@ -53,6 +54,7 @@ export default function TestPage() {
             "battery",
           ]}
         />
+        <MetroTilesDemo/>
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">

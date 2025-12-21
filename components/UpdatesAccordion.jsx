@@ -11,7 +11,7 @@ export default function UpdatesAccordion() {
     <Accordion type="single" collapsible>
       <AccordionItem
         value="faq"
-        className="mx-4 px-3 bg-primary/20 py-2 rounded-md border border-black/30 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+        className="mx-4 px-3"
       >
         <AccordionTrigger className="flex items-center justify-center hover:no-underline">
           <div className="flex items-center gap-5 cursor-pointer">
