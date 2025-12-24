@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { Client, Databases, ID, Query } from "node-appwrite";
-import { config, collections, getUserFromSession } from "@/lib/appwrite/kdsm";
+import {
+  config,
+  collections,
+  getUserFromSession,
+  createSessionClient,
+} from "@/lib/appwrite/kdsm";
+import { encrypt } from "@/utils/kdsm";
 
 /**
  * POST - Create a new shared encrypted message
@@ -15,8 +21,7 @@ export async function POST(request) {
       );
     }
 
-    const { password, email, username, platformName } =
-      await request.json();
+    const { password, email, username, platformName } = await request.json();
 
     // Validate inputs
     if (!password || password.length > 30 || password.length < 6) {
@@ -40,41 +45,39 @@ export async function POST(request) {
       .setKey(config.api_key);
 
     const databases = new Databases(client);
-
+    const { hashedAnswer } = await databases.getDocument(
+      config.database,
+      collections.users,
+      user.$id,
+      [Query.select("hashedAnswer")]
+    );
     // Create document in Appwrite
-    const document = await databases.createDocument(
+    await databases.createDocument(
       config.database,
       collections.savedPasswords,
       ID.unique(),
       {
-        userId: user.$id,
+        user: user.$id,
         username,
         email,
         platformName,
-        password,
+        passwordHash: encrypt(password, hashedAnswer),
       }
     );
-
-    // Generate share URL
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "https://kdsm.tech";
-    const shareUrl = `${baseUrl}/encryptor/shared/${slug}`;
 
     return NextResponse.json({
       success: true,
       data: {
-        slug,
-        shareUrl,
-        documentId: document.$id,
-        expiresAt: new Date(
-          new Date(document.$createdAt).getTime() + expiry * 1000
-        ).toISOString(),
+        platformName,
       },
     });
   } catch (error) {
     console.error("Create shared message error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to create shared message" },
+      {
+        success: false,
+        error: error.message || "Failed to create shared message",
+      },
       { status: 500 }
     );
   }
@@ -100,37 +103,23 @@ export async function GET(request) {
 
     const databases = new Databases(client);
 
-    const response = await databases.listDocuments(
+    const passwords = await databases.listDocuments(
       config.database,
-      collections.share_encrypted_messages,
-      [Query.equal("userId", user.$id), Query.orderDesc("$createdAt")]
+      collections.savedPasswords,
+      [Query.equal("user", user.$id), Query.orderDesc("$createdAt")]
     );
-
-    const messages = response.documents.map((doc) => {
-      const createdAt = new Date(doc.$createdAt);
-      const expiresAt = new Date(
-        createdAt.getTime() + doc.expire_seconds * 1000
-      );
-      const isExpired = new Date() > expiresAt;
-
-      return {
-        id: doc.$id,
-        slug: doc.message_slug,
-        isExpired,
-        createdAt: doc.$createdAt,
-        expiresAt: expiresAt.toISOString(),
-        username: doc.username,
-      };
-    });
 
     return NextResponse.json({
       success: true,
-      data: messages,
+      data: passwords,
     });
   } catch (error) {
-    console.error("Get shared messages error:", error);
+    console.error("Get passwords error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to get shared messages" },
+      {
+        success: false,
+        error: error.message || "Failed to get passwords",
+      },
       { status: 500 }
     );
   }

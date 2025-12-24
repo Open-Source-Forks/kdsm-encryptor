@@ -28,7 +28,7 @@ export const metadata = {
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.tech/icons/1.png",
+        url: "https://kdsm.tech/icons/encryptor.webp",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor Authenticate Page",

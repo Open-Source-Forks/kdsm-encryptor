@@ -83,7 +83,7 @@ export default function ChatsPage() {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-3">
                   <Image
-                    src="/icons/2.png"
+                    src="/icons/messaging.webp"
                     width={65}
                     height={65}
                     className="me-2 object-cover"

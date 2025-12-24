@@ -8,7 +8,7 @@ export function Dock() {
       title: "Encryptor",
       icon: (
         <Image
-          src="/icons/1.png"
+          src="/icons/encryptor.webp"
           width={55}
           height={55}
           alt="KDSM icon"
@@ -21,7 +21,7 @@ export function Dock() {
       title: "DOCS",
       icon: (
         <Image
-          src="/icons/4.png"
+          src="/icons/docs.webp"
           width={55}
           height={55}
           alt="KDSM icon"
@@ -34,7 +34,7 @@ export function Dock() {
       title: "Profile",
       icon: (
         <Image
-          src="/icons/3.png"
+          src="/icons/profile.webp"
           width={55}
           height={55}
           alt="Profile icon"
@@ -47,7 +47,7 @@ export function Dock() {
       title: "Chats",
       icon: (
         <Image
-          src="/icons/2.png"
+          src="/icons/messaging.webp"
           width={55}
           height={55}
           alt="KDSM chats Logo"
@@ -60,7 +60,7 @@ export function Dock() {
       title: "Password Generator",
       icon: (
         <Image
-          src="/icons/6.png"
+          src="/icons/pass.webp"
           width={55}
           height={55}
           alt="KDSM Password generator Logo"
@@ -73,7 +73,7 @@ export function Dock() {
       title: "Contribute",
       icon: (
         <Image
-          src="/icons/7.png"
+          src="/icons/github.webp"
           width={55}
           height={55}
           alt="KDSM Contribute Logo"

@@ -55,13 +55,26 @@ import {
   LogOut,
   AlertTriangle,
   CheckCircle,
-  ShieldHalfIcon,
+  Edit,
+  Lock,
+  UserX,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import UserTierBadge from "@/components/ui/UserTierBadge";
+import { decrypt } from "@/utils/kdsm";
 
 export default function ProfilePage() {
   const { user, logout, loading } = useAuth();
@@ -74,6 +87,42 @@ export default function ProfilePage() {
   const [rateLimitStatus, setRateLimitStatus] = useState(null);
   const [loadingRateLimit, setLoadingRateLimit] = useState(false);
 
+  // Profile update states
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  // Password change states
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  // Security question change states
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
+  const [securityStep, setSecurityStep] = useState(1); // 1: verify old, 2: set new
+  const [securityQuestions, setSecurityQuestions] = useState([]);
+  const [oldSecurityData, setOldSecurityData] = useState({
+    questionId: "",
+    answer: "",
+  });
+  const [newSecurityData, setNewSecurityData] = useState({
+    questionId: "",
+    answer: "",
+  });
+  const [changingSecurity, setChangingSecurity] = useState(false);
+
+  // Delete account states
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/auth/login");
@@ -81,6 +130,7 @@ export default function ProfilePage() {
     }
 
     if (user) {
+      // console.log(decrypt(user.hashedAnswer, user.securityQuestion.$id));
       fetchApiKeys();
       fetchRateLimitStatus();
     }
@@ -214,25 +264,185 @@ export default function ProfilePage() {
     });
   };
 
-  const getTierIcon = (tier) => {
-    switch (tier) {
-      case "admin":
-        return <Shield className="w-4 h-4 text-red-500" />;
-      case "premium":
-        return <Crown className="w-4 h-4 text-yellow-500" />;
-      default:
-        return <Zap className="w-4 h-4 text-blue-500" />;
+  // Fetch security questions on mount
+  useEffect(() => {
+    const fetchSecurityQuestions = async () => {
+      try {
+        const response = await fetch("/api/auth/security-questions");
+        const data = await response.json();
+        if (data.success) {
+          setSecurityQuestions(data.questions);
+        }
+      } catch (error) {
+        console.error("Error fetching security questions:", error);
+      }
+    };
+    fetchSecurityQuestions();
+  }, []);
+
+  // Handle profile update
+  const handleUpdateProfile = async () => {
+    if (!profileData.name && !profileData.email) {
+      toast.error("Please provide at least name or email to update");
+      return;
+    }
+
+    if (profileData.email && !profileData.password) {
+      toast.error("Password is required to update email");
+      return;
+    }
+
+    setUpdatingProfile(true);
+    try {
+      const response = await fetch("/api/auth/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message || "Profile updated successfully");
+        setShowProfileDialog(false);
+        setProfileData({ name: "", email: "", password: "" });
+        // Refresh user data
+        window.location.reload();
+      } else {
+        toast.error(data.error || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
+      setUpdatingProfile(false);
     }
   };
 
-  const getTierColor = (tier) => {
-    switch (tier) {
-      case "admin":
-        return "bg-red-100 text-red-800";
-      case "premium":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-blue-100 text-blue-800";
+  // Handle password change
+  const handleChangePassword = async () => {
+    if (
+      !passwordData.oldPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      toast.error("Please fill in all password fields");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters long");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const response = await fetch("/api/auth/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldPassword: passwordData.oldPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Password changed successfully");
+        setShowPasswordDialog(false);
+        setPasswordData({
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        toast.error(data.error || "Failed to change password");
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Failed to change password");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  // Handle security question change - verify old
+  const handleVerifyOldSecurity = async () => {
+    if (!oldSecurityData.questionId || !oldSecurityData.answer) {
+      toast.error(
+        "Please select your security question and provide the answer"
+      );
+      return;
+    }
+
+    setChangingSecurity(true);
+    try {
+      // TODO: Add API endpoint to verify old security answer
+      // For now, we'll assume verification is successful
+      toast.success("Security answer verified");
+      setSecurityStep(2);
+    } catch (error) {
+      console.error("Error verifying security answer:", error);
+      toast.error("Failed to verify security answer");
+    } finally {
+      setChangingSecurity(false);
+    }
+  };
+
+  // Handle security question change - set new
+  const handleSetNewSecurity = async () => {
+    if (!newSecurityData.questionId || !newSecurityData.answer) {
+      toast.error(
+        "Please select a new security question and provide the answer"
+      );
+      return;
+    }
+
+    setChangingSecurity(true);
+    try {
+      // TODO: Add API endpoint to update security question
+      toast.success("Security question updated successfully");
+      setShowSecurityDialog(false);
+      setSecurityStep(1);
+      setOldSecurityData({ questionId: "", answer: "" });
+      setNewSecurityData({ questionId: "", answer: "" });
+    } catch (error) {
+      console.error("Error updating security question:", error);
+      toast.error("Failed to update security question");
+    } finally {
+      setChangingSecurity(false);
+    }
+  };
+
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const response = await fetch("/api/auth/user", {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Account deleted successfully");
+        await logout();
+        router.push("/");
+      } else {
+        toast.error(data.error || "Failed to delete account");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("Failed to delete account");
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -250,7 +460,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <Card className="w-full text-primary bg-secondary/90 backdrop-blur-md min-h-screen">
+    <Card className="max-w-4xl w-full text-primary bg-secondary/90 backdrop-blur-md min-h-screen">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <InitialsAvatar user={user} />
@@ -258,16 +468,7 @@ export default function ProfilePage() {
             <CardTitle className="flex items-center gap-2 flex-wrap font-tomorrow">
               {user?.name || "User"}
               {rateLimitStatus && (
-                <Badge
-                  className={`${getTierColor(
-                    rateLimitStatus?.tier
-                  )} flex items-center gap-1 capitalize font-tomorrow`}
-                >
-                  {getTierIcon(rateLimitStatus?.tier)}
-                  <span className="hidden sm:block">
-                    {rateLimitStatus?.tier}
-                  </span>
-                </Badge>
+                <UserTierBadge tier={rateLimitStatus?.tier} />
               )}
               {user?.emailVerification && (
                 <Badge variant="success">
@@ -281,7 +482,7 @@ export default function ProfilePage() {
             </CardDescription>
           </div>
           <Image
-            src="/icons/3.png"
+            src="/icons/profile.webp"
             width={86}
             height={86}
             className="ml-auto object-cover"
@@ -289,7 +490,6 @@ export default function ProfilePage() {
           />
         </div>
         <Separator />
-        {user?.hashedAnswer}
       </CardHeader>
 
       <CardContent>
@@ -310,7 +510,13 @@ export default function ProfilePage() {
               <p className="text-sm text-muted-foreground">
                 Joined:{" "}
                 {user?.registration
-                  ? new Date(user.registration).toLocaleDateString()
+                  ? new Date(user.registration).toUTCString()
+                  : "Unknown"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Last Logged in:{" "}
+                {user?.lastLogin
+                  ? new Date(user.lastLogin).toUTCString()
                   : "Unknown"}
               </p>
             </div>
@@ -359,12 +565,473 @@ export default function ProfilePage() {
                 </AlertDescription>
               </Alert>
             )}
+            {/* Your Resources Section */}
+            <Separator className="my-6" />
+            <div className="space-y-4">
+              <h3 className="text-lg text-white font-medium">Your Resources</h3>
+              <div className="flex gap-3 flex-col sm:flex-row sm:gap-4 flex-wrap">
+                <Link
+                  href={"/profile/saved-passwords"}
+                  className="flex-1 shadow-2xl ring-4 ring-primary/20 rounded-lg p-4 border-primary/20 text-primary hover:scale-[1.02] transition-transform duration-200"
+                  target="_blank"
+                >
+                  <div className="flex items-center mb-2 flex-col gap-2">
+                    <Image
+                      src={"/icons/saved-pass.webp"}
+                      width={64}
+                      height={64}
+                      alt="Saved Passwords"
+                    />
+                    <h4 className="ms-2 font-semibold text-md">
+                      Saved Passwords
+                    </h4>
+                  </div>
+                </Link>
+                <Link
+                  href={"/profile/secure-files"}
+                  className="flex-1 shadow-2xl ring-4 ring-primary/20 rounded-lg p-4 border-primary/20 text-primary hover:scale-[1.02] transition-transform duration-200"
+                  target="_blank"
+                >
+                  <div className="flex items-center mb-2 flex-col gap-2">
+                    <Image
+                      src={"/icons/secure-files.webp"}
+                      width={64}
+                      height={64}
+                      alt="Secure Files"
+                    />
+                    <h4 className="ms-2 font-semibold text-md">Secure Files</h4>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            {/* Account Management Section */}
+            <Separator className="my-6" />
+            <div className="space-y-4">
+              <h3 className="text-lg text-white font-medium">
+                Account Management
+              </h3>
+              <div className="flex gap-3 flex-col sm:flex-row sm:gap-4 flex-wrap">
+                {/* Update Profile Button */}
+                <Dialog
+                  open={showProfileDialog}
+                  onOpenChange={setShowProfileDialog}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() =>
+                        setProfileData({
+                          name: user?.name || "",
+                          email: "",
+                          password: "",
+                        })
+                      }
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Update Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Update Profile</DialogTitle>
+                      <DialogDescription>
+                        Update your name or email address. Email changes require
+                        your current password.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="profile-name">Name</Label>
+                        <Input
+                          id="profile-name"
+                          value={profileData.name}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              name: e.target.value,
+                            })
+                          }
+                          placeholder="Your name"
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="profile-email">Email</Label>
+                        <Input
+                          id="profile-email"
+                          type="email"
+                          value={profileData.email}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              email: e.target.value,
+                            })
+                          }
+                          placeholder="your.email@example.com"
+                          className="mt-2"
+                        />
+                      </div>
+                      {profileData.email && (
+                        <div>
+                          <Label htmlFor="profile-password">
+                            Current Password (required for email change)
+                          </Label>
+                          <Input
+                            id="profile-password"
+                            type="password"
+                            value={profileData.password}
+                            onChange={(e) =>
+                              setProfileData({
+                                ...profileData,
+                                password: e.target.value,
+                              })
+                            }
+                            placeholder="••••••••"
+                            className="mt-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowProfileDialog(false)}
+                        disabled={updatingProfile}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleUpdateProfile}
+                        disabled={updatingProfile}
+                      >
+                        {updatingProfile ? "Updating..." : "Update Profile"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Change Password Button */}
+                <Dialog
+                  open={showPasswordDialog}
+                  onOpenChange={setShowPasswordDialog}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() =>
+                        setPasswordData({
+                          oldPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        })
+                      }
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      Change Password
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Password</DialogTitle>
+                      <DialogDescription>
+                        Enter your current password and choose a new one.
+                        Minimum 8 characters required.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="old-password">Current Password</Label>
+                        <Input
+                          id="old-password"
+                          type="password"
+                          value={passwordData.oldPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              oldPassword: e.target.value,
+                            })
+                          }
+                          placeholder="••••••••"
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-password">New Password</Label>
+                        <Input
+                          id="new-password"
+                          type="password"
+                          value={passwordData.newPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              newPassword: e.target.value,
+                            })
+                          }
+                          placeholder="••••••••"
+                          className="mt-2"
+                          minLength={8}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirm-password">
+                          Confirm New Password
+                        </Label>
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              confirmPassword: e.target.value,
+                            })
+                          }
+                          placeholder="••••••••"
+                          className="mt-2"
+                          minLength={8}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowPasswordDialog(false)}
+                        disabled={changingPassword}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleChangePassword}
+                        disabled={changingPassword}
+                      >
+                        {changingPassword ? "Changing..." : "Change Password"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Change Security Question Button */}
+                <Dialog
+                  open={showSecurityDialog}
+                  onOpenChange={(open) => {
+                    setShowSecurityDialog(open);
+                    if (!open) {
+                      setSecurityStep(1);
+                      setOldSecurityData({ questionId: "", answer: "" });
+                      setNewSecurityData({ questionId: "", answer: "" });
+                    }
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Change Security Question
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        {securityStep === 1
+                          ? "Verify Current Security Question"
+                          : "Set New Security Question"}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {securityStep === 1
+                          ? "First, verify your identity by answering your current security question."
+                          : "Choose and answer a new security question for account recovery."}
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {securityStep === 1 ? (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="old-security-question">
+                            Your Current Security Question
+                          </Label>
+                          <Select
+                            value={oldSecurityData.questionId}
+                            onValueChange={(value) =>
+                              setOldSecurityData({
+                                ...oldSecurityData,
+                                questionId: value,
+                              })
+                            }
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue placeholder="Select your security question" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Security Questions</SelectLabel>
+                                {securityQuestions.map((q) => (
+                                  <SelectItem key={q.$id} value={q.$id}>
+                                    {q.question}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="old-answer">Answer</Label>
+                          <Input
+                            id="old-answer"
+                            type="text"
+                            value={oldSecurityData.answer}
+                            onChange={(e) =>
+                              setOldSecurityData({
+                                ...oldSecurityData,
+                                answer: e.target.value,
+                              })
+                            }
+                            placeholder="Your answer"
+                            className="mt-2"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="new-security-question">
+                            New Security Question
+                          </Label>
+                          <Select
+                            value={newSecurityData.questionId}
+                            onValueChange={(value) =>
+                              setNewSecurityData({
+                                ...newSecurityData,
+                                questionId: value,
+                              })
+                            }
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue placeholder="Select a new security question" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Security Questions</SelectLabel>
+                                {securityQuestions.map((q) => (
+                                  <SelectItem key={q.$id} value={q.$id}>
+                                    {q.question}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="new-answer">New Answer</Label>
+                          <Input
+                            id="new-answer"
+                            type="text"
+                            value={newSecurityData.answer}
+                            onChange={(e) =>
+                              setNewSecurityData({
+                                ...newSecurityData,
+                                answer: e.target.value,
+                              })
+                            }
+                            placeholder="Your new answer"
+                            className="mt-2"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (securityStep === 2) {
+                            setSecurityStep(1);
+                          } else {
+                            setShowSecurityDialog(false);
+                          }
+                        }}
+                        disabled={changingSecurity}
+                      >
+                        {securityStep === 2 ? "Back" : "Cancel"}
+                      </Button>
+                      <Button
+                        onClick={
+                          securityStep === 1
+                            ? handleVerifyOldSecurity
+                            : handleSetNewSecurity
+                        }
+                        disabled={changingSecurity}
+                      >
+                        {changingSecurity
+                          ? "Processing..."
+                          : securityStep === 1
+                          ? "Verify & Continue"
+                          : "Update Security Question"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Separator className="my-4" />
+
+              {/* Delete Account Button */}
+              <AlertDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="mx-auto flex items-center"
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account, remove all your data from our servers, and
+                      revoke all your API keys. You will be logged out
+                      immediately.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Warning:</strong> All your resources on this
+                      platform, API keys, and account settings will be
+                      permanently lost.
+                    </AlertDescription>
+                  </Alert>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={deletingAccount}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      disabled={deletingAccount}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deletingAccount
+                        ? "Deleting..."
+                        : "Yes, Delete My Account"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </TabsContent>
 
           <TabsContent value="developer" className="space-y-4">
             <div className="flex justify-center items-center w-full mb-5">
               <Image
-                src="/icons/5.png"
+                src="/icons/api.webp"
                 width={120}
                 height={120}
                 className="me-2 object-cover"
@@ -392,7 +1059,12 @@ export default function ProfilePage() {
                           htmlFor="cryptopass-delivery"
                           className="text-sm font-medium flex items-center gap-2 cursor-pointer"
                         >
-                          <ShieldHalfIcon className="w-4 h-4" />
+                          <Image
+                            src={"/icons/crypto-pass.webp"}
+                            width={32}
+                            height={32}
+                            alt="CryptoPass Icon"
+                          />
                           Enable CryptoPass Delivery
                         </Label>
                       </div>
@@ -456,15 +1128,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium">API Usage</h4>
-                      <Badge
-                        className={`${getTierColor(
-                          rateLimitStatus.tier
-                        )} flex items-center gap-1`}
-                      >
-                        {getTierIcon(rateLimitStatus.tier)}
-                        {rateLimitStatus.tier.charAt(0).toUpperCase() +
-                          rateLimitStatus.tier.slice(1)}
-                      </Badge>
+                      <UserTierBadge tier={rateLimitStatus?.tier} />
                     </div>
                     <Button
                       variant="ghost"

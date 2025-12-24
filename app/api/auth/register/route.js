@@ -27,7 +27,7 @@ export async function POST(request) {
     const passwordHash = encrypt(password, password);
     
     // Encrypt the security answer
-    const hashedAnswer = encrypt(answer, password);
+    const hashedAnswer = encrypt(answer, securityQuestion);
     
     // Create user account in Appwrite Auth (this also hashes the password internally)
     const user = await account.create(

@@ -238,7 +238,7 @@ export default function PasswordGenerator() {
         <Card className="w-full text-primary bg-primary/10 gap-0">
           <CardHeader className="flex flex-col sm:flex-row-reverse items-center gap-3 sm:gap-4">
             <Image
-              src="/icons/6.png"
+              src="/icons/pass.webp"
               width={86}
               height={86}
               className="me-2 object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-[86px] md:h-[86px] pointer-events-none"

@@ -391,7 +391,8 @@ export default function RegisterPage() {
               onChange={(e) => updateFormState({ answer: e.target.value })}
               placeholder="The answer to your security question"
               required
-              maxLength={25}
+              maxLength={12}
+              minLength={6}
             />
           </div>
           {/* Security reminder for generated passwords */}

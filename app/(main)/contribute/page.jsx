@@ -20,7 +20,7 @@ const GitHubStars = async () => {
     return (
       <Badge
         variant="secondary"
-        className="flex items-center gap-1 bg-secondary/50 text-primary border-primary/20 backdrop-blur-sm"
+        className="flex items-center gap-1 bg-secondary/80 text-primary border-primary/20 backdrop-blur-sm"
       >
         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
         <span>{stars} stars</span>
@@ -30,7 +30,7 @@ const GitHubStars = async () => {
     return (
       <Badge
         variant="secondary"
-        className="flex items-center gap-1 bg-secondary/50 text-primary border-primary/20 backdrop-blur-sm"
+        className="flex items-center gap-1 bg-secondary/80 text-primary border-primary/20 backdrop-blur-sm"
       >
         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
         <span>Star us!</span>
@@ -45,32 +45,33 @@ export default function ContributePage() {
       {/* Header Section */}
       <div className="mb-12">
         <Image
-          src="/icons/7.png"
+          src="/icons/github.webp"
           alt="Contribute to KDSM"
           width={200}
           height={200}
           className="rounded-full mx-auto mb-6 shadow-2xl ring-4 ring-primary/20"
         />
+        <div className="bg-secondary/40 backdrop-blur-md border-primary/20 text-primary p-4 rounded-md">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <h1 className="font-tomorrow text-4xl md:text-6xl font-bold text-primary drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+              Join the Revolution!
+            </h1>
+            <GitHubStars />
+          </div>
 
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <h1 className="font-tomorrow text-4xl md:text-6xl font-bold text-primary drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-            Join the Revolution!
-          </h1>
-          <GitHubStars />
+          <p className="text-xl text-primary/90 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
+            Help us build the future of encryption with the innovative{" "}
+            <span className="text-blue-300 font-semibold">
+              Keyed Dynamic Shift Matrix
+            </span>{" "}
+            algorithm
+          </p>
         </div>
-
-        <p className="text-xl text-primary/90 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
-          Help us build the future of encryption with the innovative{" "}
-          <span className="text-blue-300 font-semibold">
-            Keyed Dynamic Shift Matrix
-          </span>{" "}
-          algorithm
-        </p>
       </div>
 
       {/* Feature Cards */}
       <div className="grid md:grid-cols-2 gap-6 mb-12">
-        <Card className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary">
+        <Card className="bg-secondary/80 backdrop-blur-md border-primary/20 text-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="w-8 h-8 text-blue-400" />
@@ -84,21 +85,21 @@ export default function ContributePage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary">
+        <Card className="bg-secondary/80 backdrop-blur-md border-primary/20 text-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Zap className="w-8 h-8 text-yellow-400" />
               <h3 className="text-xl font-semibold">High Performance</h3>
             </div>
             <p className="text-primary/80 leading-relaxed">
-              Built with Next.js 14, React 18, and optimized for lightning-fast
+              Built with Next.js 16+, React 19, and optimized for lightning-fast
               encryption that scales with your needs. Performance meets
               security.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary">
+        <Card className="bg-secondary/80 backdrop-blur-md border-primary/20 text-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Users className="w-8 h-8 text-green-400" />
@@ -111,7 +112,7 @@ export default function ContributePage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary">
+        <Card className="bg-secondary/80 backdrop-blur-md border-primary/20 text-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Code className="w-8 h-8 text-purple-400" />
@@ -127,7 +128,7 @@ export default function ContributePage() {
 
       {/* Call to Action */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-primary mb-4">
+        <h2 className="text-2xl font-semibold text-primary mb-4 bg-secondary/40 backdrop-blur-md border-primary/20 p-2 rounded-md">
           Ready to Build Something Extraordinary?
         </h2>
 
@@ -152,7 +153,7 @@ export default function ContributePage() {
             asChild
             variant="outline"
             size="lg"
-            className="border-primary/30 text-primary hover:bg-secondary/50 font-semibold px-8 py-3 rounded-lg transition-all duration-300 backdrop-blur-sm"
+            className="border-primary/30 text-primary hover:bg-secondary/80 font-semibold px-8 py-3 rounded-lg transition-all duration-300 backdrop-blur-sm"
           >
             <a
               href="https://github.com/Idrisvohra9/kdsm-encryptor/blob/main/CONTRIBUTING.md"
@@ -164,7 +165,7 @@ export default function ContributePage() {
           </Button>
         </div>
 
-        <p className="bg-secondary/50 backdrop-blur-md border-primary/20 text-primary p-2 rounded-md text-sm italic mt-6 max-w-xl mx-auto">
+        <p className="bg-secondary/80 backdrop-blur-md border-primary/20 text-primary p-2 rounded-md text-sm italic mt-6 max-w-xl mx-auto">
           "In a world where privacy is becoming a luxury, we're making it a
           right." - KDSM Team
         </p>

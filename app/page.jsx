@@ -61,11 +61,11 @@ export default function page() {
         </p>
       </div>
       
-      <BubbleMenu logo="/icons/1.png" useFixedPosition={true} />
+      <BubbleMenu logo="/icons/encryptor.webp" useFixedPosition={true} />
       <section className="relative w-full h-screen overflow-hidden" id="home" aria-label="Hero section">
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-primary/2 pointer-events-none">
           <Image
-            src="/icons/4.png"
+            src="/icons/docs.webp"
             alt="KDSM Encryptor"
             width={240}
             height={240}

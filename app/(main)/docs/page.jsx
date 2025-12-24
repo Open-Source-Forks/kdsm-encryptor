@@ -524,7 +524,7 @@ export default function ReadmePage() {
           <Section id="encryption-api" title="Encryption API v1">
             <div className="flex justify-center items-center w-full mb-5">
               <Image
-                src="/icons/5.png"
+                src="/icons/api.webp"
                 width={120}
                 height={120}
                 className="me-2 object-cover"

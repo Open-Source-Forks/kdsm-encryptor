@@ -27,7 +27,7 @@ export const metadata = {
     siteName: "KDSM Encryptor",
     images: [
       {
-        url: "https://kdsm.tech/icons/1.png",
+        url: "https://kdsm.tech/icons/encryptor.webp",
         width: 1200,
         height: 630,
         alt: "KDSM Encryptor Authenticate Page",
@@ -39,7 +39,7 @@ export const metadata = {
 };
 export default function Layout({ children }) {
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
+    <div className="flex justify-center items-center min-h-screen p-4 md:p-24">
       <LiquidChrome />
       {children}
     </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -30,6 +30,11 @@ export default function SavePasswordPopover({ password = "" }) {
     password: password,
     username: user?.name || "",
   });
+
+  // Update form password when the password prop changes
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, password: password }));
+  }, [password]);
   const [editingEmail, setEditingEmail] = useState(false);
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState(true);
@@ -48,14 +53,16 @@ export default function SavePasswordPopover({ password = "" }) {
       const data = await response.json();
       if (data.success) {
         setSubmitting(false);
-        toast.success("Password saved successfully!", {
-          description: "You can view it in your profile.",
-        });
+        toast.success(
+          `Password saved successfully for ${data.data.platformName?.toUpperCase()}!`,
+          {
+            description: "You can view it in your profile.",
+          }
+        );
       } else {
         toast.error("Oopsie!", {
-        description:
-          data.error || "Failed to save password",
-      });
+          description: data.error || "Failed to save password",
+        });
         setSubmitting(false);
       }
     } catch (error) {
@@ -70,7 +77,8 @@ export default function SavePasswordPopover({ password = "" }) {
     <Popover>
       <PopoverTrigger asChild>
         <Button disabled={submitting}>
-          {submitting ? "Saving Password..." : "Save Password"} <Key className="w-4 h-4 sm:w-5 sm:h-5" />
+          {submitting ? "Saving Password..." : "Save Password"}{" "}
+          <Key className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -193,7 +201,7 @@ export default function SavePasswordPopover({ password = "" }) {
             ) : (
               <div className="space-x-2 flex items-center">
                 <div className="leading-none">Platform:</div>
-                <p className="text-muted-foreground">{form.platformName}</p>
+                <p className="text-muted-foreground uppercase">{form.platformName}</p>
                 <Button
                   variant="link"
                   size="sm"

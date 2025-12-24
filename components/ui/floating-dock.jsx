@@ -98,7 +98,7 @@ const FloatingDockDesktop = ({ items, className }) => {
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "mx-auto hidden h-18 items-end gap-4 rounded-2xl bg-primary/20 backdrop-blur-md border border-white/20 shadow-lg px-4 pb-3 md:flex max-w-fit justify-center",
+        "mx-auto hidden h-18 items-end gap-4 rounded-2xl bg-secondary/60 backdrop-blur-md border border-white/20 shadow-lg px-4 pb-3 md:flex max-w-fit justify-center",
         className
       )}
     >
@@ -168,7 +168,7 @@ function IconContainer({ mouseX, title, icon, href, isActive }) {
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`relative flex aspect-square items-center justify-center rounded-full bg-primary/20 backdrop-blur-sm border border-white/20 shadow-md group-hover:bg-primary/30 group-hover:border-white/30 transition-colors ${
+        className={`relative flex aspect-square items-center justify-center rounded-full bg-secondary/40 backdrop-blur-sm border border-white/20 shadow-md group-hover:bg-primary/30 group-hover:border-white/30 transition-colors ${
           isActive && "border-2 !border-white"
         }`}
       >
